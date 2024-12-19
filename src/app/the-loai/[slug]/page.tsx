@@ -3,15 +3,15 @@ import { MovieCard } from "@/components/MovieCard";
 import { Pagination } from "@/components/Pagination";
 import React from "react";
 
-async function Category({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams: { page: string };
-}) {
-  const { slug } = params;
-  const currentPage = Number(searchParams.page) || 1;
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+async function Category({ params, searchParams }: Props) {
+  const { slug } = await params;
+  const { page } = await searchParams;
+  const currentPage = Number(page) || 1;
 
   const data = await getCategoryMovies(slug, currentPage);
   const movies = data?.data?.items || [];

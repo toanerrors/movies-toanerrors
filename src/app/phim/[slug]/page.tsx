@@ -4,7 +4,11 @@ import MovieInfo from "@/components/MovieInfo";
 import { notFound } from "next/navigation";
 import React from "react";
 
-async function MovieDetail({ params }: { params: { slug: string } }) {
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+async function MovieDetail({ params }: Props) {
   const { slug } = await params;
   const res = await getMovieDetail(slug);
   const data = res?.data;

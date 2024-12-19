@@ -2,11 +2,11 @@ import { getHomeData } from "@/actions/homeActions";
 import { MovieCard } from "@/components/MovieCard";
 import { Pagination } from "@/components/Pagination";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: { page: string };
-}) {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function Home({ searchParams }: Props) {
   const { page } = await searchParams;
   const currentPage = Number(page) || 1;
   const data = await getHomeData(currentPage);
