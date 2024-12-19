@@ -14,7 +14,7 @@ async function MovieDetail({ params }: Props) {
   const data = res?.data;
 
   if (!data) return notFound();
-
+  // OK
   return (
     <main className="space-y-8 py-6 container mx-auto px-4 min-h-screen">
       <MovieInfo movie={data.item} />
