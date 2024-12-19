@@ -15,11 +15,16 @@ type ListType =
   | "subteam";
 
 export const getMoviesList = async (type: ListType, page: number = 1) => {
-  const response = await axiosClient.get<PaginatedResponse<Movie>>(
-    `/v1/api/danh-sach/${type}`,
-    {
-      params: { page },
-    }
-  );
-  return response.data;
+  try {
+    const response = await axiosClient.get<PaginatedResponse<Movie>>(
+      `/v1/api/danh-sach/${type}`,
+      {
+        params: { page },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching movies list:", error);
+    return null;
+  }
 };
