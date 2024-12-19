@@ -1,16 +1,19 @@
-import { getHomeData } from "@/actions/homeActions";
+import { getCategoryMovies } from "@/actions";
 import { MovieCard } from "@/components/MovieCard";
 import { Pagination } from "@/components/Pagination";
+import React from "react";
 
-export default async function Home({
+async function Category({
+  params,
   searchParams,
 }: {
+  params: { slug: string };
   searchParams: { page: string };
 }) {
-  const { page } = await searchParams;
-  const currentPage = Number(page) || 1;
-  const data = await getHomeData(currentPage);
+  const { slug } = params;
+  const currentPage = Number(searchParams.page) || 1;
 
+  const data = await getCategoryMovies(slug, currentPage);
   const movies = data?.data?.items || [];
   const CDN = data?.data?.APP_DOMAIN_CDN_IMAGE || "";
   const { totalItems, totalItemsPerPage } =
@@ -19,7 +22,7 @@ export default async function Home({
   return (
     <main className="container mx-auto py-4 sm:py-6 px-2 sm:px-4">
       <div className="flex justify-between items-center mb-2 sm:mb-4">
-        <h1 className="text-lg sm:text-xl font-bold">Phim mới cập nhật</h1>
+        <h1 className="text-lg sm:text-xl font-bold">Phim theo thể loại</h1>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
@@ -38,3 +41,5 @@ export default async function Home({
     </main>
   );
 }
+
+export default Category;

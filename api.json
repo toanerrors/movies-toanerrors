@@ -1,0 +1,407 @@
+{
+  "info": {
+    "_postman_id": "8e05a506-a5a4-4527-b311-81968961825b",
+    "name": "OPhim-API-Public",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "13480982"
+  },
+  "item": [
+    {
+      "name": "API-V1",
+      "item": [
+        {
+          "name": "Home",
+          "item": [
+            {
+              "name": "Home:::Get",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/home",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "home"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "List",
+          "item": [
+            {
+              "name": "List:::PhimBo",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/phim-bo",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "phim-bo"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List:::PhimLe",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/phim-le",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "phim-le"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List:::HoatHinh",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/hoat-hinh",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "hoat-hinh"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List:::TVShows",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/tv-shows",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "tv-shows"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List:::PhimVietsub",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/phim-vietsub",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "phim-vietsub"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List:::PhimThuyetMinh",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/phim-thuyet-minh",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "phim-thuyet-minh"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List:::PhimLongTieng",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/phim-long-tieng",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "phim-long-tieng"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List:::PhimBoDangChieu",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/phim-bo-dang-chieu",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "phim-bo-dang-chieu"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List:::PhimBoHoanThanh",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/phim-bo-hoan-thanh",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "phim-bo-hoan-thanh"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List:::PhimSapChieu",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/phim-sap-chieu",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "phim-sap-chieu"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "List:::Subteam",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/danh-sach/subteam",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "danh-sach",
+                    "subteam"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Categories",
+          "item": [
+            {
+              "name": "Categories:::List",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/the-loai",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "the-loai"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Categories:::Movies",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/the-loai/hanh-dong",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "the-loai",
+                    "hanh-dong"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Countries",
+          "item": [
+            {
+              "name": "Countries:::List",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/quoc-gia",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "quoc-gia"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Countries:::Movies",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/quoc-gia/han-quoc",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "quoc-gia",
+                    "han-quoc"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Movies",
+          "item": [
+            {
+              "name": "Movies:::Slug",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/phim/vo-lam-huu-kieu-khi",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "phim",
+                    "vo-lam-huu-kieu-khi"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Search",
+          "item": [
+            {
+              "name": "Search:::Keyword",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{DOMAIN_API}}/v1/api/tim-kiem?keyword=hậu duệ mặt trời",
+                  "host": [
+                    "{{DOMAIN_API}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "tim-kiem"
+                  ],
+                  "query": [
+                    {
+                      "key": "keyword",
+                      "value": "hậu duệ mặt trời"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
