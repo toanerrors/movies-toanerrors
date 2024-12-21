@@ -133,3 +133,11 @@ export interface MovieDetailResponse {
     item: MovieDetail;
   };
 }
+
+export interface WatchHistoryItem {
+  movieSlug: string;
+  episodeSlug: string;
+  timestamp: number;
+  lastWatched: number;
+  serverName: string;
+}

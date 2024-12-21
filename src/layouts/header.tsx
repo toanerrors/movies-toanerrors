@@ -71,6 +71,11 @@ function Header() {
           Phim bộ
         </NavigationMenuLink>
       </Link>
+      <Link href="/history" legacyBehavior passHref>
+        <NavigationMenuLink className="block text-sm w-full text-left px-4 py-2 rounded-md hover:bg-accent/50 transition-colors">
+          Lịch sử
+        </NavigationMenuLink>
+      </Link>
     </div>
   );
 
@@ -136,6 +141,13 @@ function Header() {
                 <Link href="/phim-bo" legacyBehavior passHref>
                   <NavigationMenuLink className="px-4 py-2 rounded-md text-sm hover:bg-accent/50 transition-colors">
                     Phim bộ
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link href="/history" legacyBehavior passHref>
+                  <NavigationMenuLink className="px-4 py-2 rounded-md text-sm hover:bg-accent/50 transition-colors">
+                    Lịch sử
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>

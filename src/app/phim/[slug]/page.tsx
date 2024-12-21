@@ -19,7 +19,7 @@ async function MovieDetail({ params }: Props) {
     <main className="space-y-8 py-6 container mx-auto px-4 min-h-screen">
       <MovieInfo movie={data.item} />
       {data.item.episodes.length > 0 && (
-        <EpisodeList episodes={data.item.episodes} />
+        <EpisodeList episodes={data.item.episodes} movieSlug={slug} />
       )}
     </main>
   );
