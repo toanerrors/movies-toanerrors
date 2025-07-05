@@ -1,7 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { X, Play } from "lucide-react";
+import { X, Play, SkipForward, Pause } from "lucide-react";
 
 interface AutoPlayNotificationProps {
   isVisible: boolean;
@@ -22,73 +22,95 @@ export default function AutoPlayNotification({
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.9 }}
+          initial={{ opacity: 0, y: 100, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 50, scale: 0.9 }}
-          transition={{ type: "spring", duration: 0.5 }}
-          className="fixed bottom-4 right-4 z-50 bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-4 max-w-sm"
+          exit={{ opacity: 0, y: 100, scale: 0.9 }}
+          transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
+          className="fixed bottom-6 right-6 z-50 bg-background/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-5 max-w-sm min-w-[320px]"
         >
-          <div className="flex items-start gap-3">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Play className="h-4 w-4 text-primary" />
-                <span className="font-medium text-sm">
-                  Tự động phát tập tiếp theo
-                </span>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                <SkipForward className="h-4 w-4 text-primary" />
               </div>
-
-              {nextEpisodeName && (
-                <p className="text-xs text-muted-foreground mb-2">
-                  {nextEpisodeName}
-                </p>
-              )}
-
-              <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold">
-                  {countdown}
-                </div>
-                <span className="text-xs text-muted-foreground">giây</span>
-              </div>
+              <span className="font-semibold text-sm">
+                Tự động phát tập tiếp
+              </span>
             </div>
 
             <Button
               variant="ghost"
               size="sm"
               onClick={onCancel}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 hover:bg-destructive/20 hover:text-destructive"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
 
-          <div className="flex gap-2 mt-3">
+          {/* Episode info */}
+          {nextEpisodeName && (
+            <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm font-medium text-foreground line-clamp-2">
+                {nextEpisodeName}
+              </p>
+            </div>
+          )}
+
+          {/* Countdown */}
+          <div className="flex items-center justify-center mb-4">
+            <div className="relative">
+              <motion.div
+                className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl shadow-lg"
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                {countdown}
+              </motion.div>
+
+              {/* Animated ring */}
+              <motion.div
+                className="absolute inset-0 rounded-full border-4 border-primary/30"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              />
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex gap-3">
             <Button
               variant="outline"
-              size="sm"
               onClick={onCancel}
-              className="flex-1 text-xs"
+              className="flex-1 gap-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
             >
-              Hủy
+              <Pause className="h-4 w-4" />
+              Dừng lại
             </Button>
             <Button
-              variant="default"
-              size="sm"
               onClick={onPlayNow}
-              className="flex-1 text-xs"
+              className="flex-1 gap-2 bg-primary hover:bg-primary/90"
             >
+              <Play className="h-4 w-4" />
               Phát ngay
             </Button>
           </div>
 
           {/* Progress bar */}
-          <div className="mt-3 w-full bg-muted rounded-full h-1">
+          <div className="mt-4 w-full bg-muted/50 rounded-full h-2 overflow-hidden">
             <motion.div
-              className="bg-primary h-1 rounded-full"
+              className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full"
               initial={{ width: "100%" }}
               animate={{ width: "0%" }}
               transition={{ duration: countdown, ease: "linear" }}
             />
           </div>
+
+          {/* Bottom text */}
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            Tập tiếp theo sẽ được phát trong {countdown} giây
+          </p>
         </motion.div>
       )}
     </AnimatePresence>

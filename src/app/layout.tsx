@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Layouts from "@/layouts";
 import { getCategories, getCountries } from "@/actions";
-
-const cherry = Inter();
 
 export const metadata: Metadata = {
   title: "MoViGo - Movies & TV Shows",
@@ -25,7 +22,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${cherry.className} antialiased`}>
+      <body className={`antialiased`}>
         <Layouts
           categories={categories?.data?.items || []}
           countries={countries?.data?.items || []}

@@ -10,8 +10,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Clock, Star, PlayCircle } from "lucide-react";
+import {
+  Clock,
+  Star,
+  PlayCircle,
+  Calendar,
+  Eye,
+  Award,
+  Users,
+  Film,
+  Heart,
+  Share2,
+  Bookmark,
+} from "lucide-react";
 import { motion } from "framer-motion";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface MovieInfoProps {
   movie: MovieDetail;
@@ -23,149 +40,290 @@ export default function MovieInfo({ movie }: MovieInfoProps) {
   const getStatusText = (status: string) => {
     switch (status) {
       case "completed":
-        return { text: "Hoàn thành", variant: "default" as const };
+        return {
+          text: "Hoàn thành",
+          variant: "default" as const,
+          color: "bg-green-500",
+        };
       case "ongoing":
-        return { text: "Đang chiếu", variant: "default" as const };
+        return {
+          text: "Đang chiếu",
+          variant: "default" as const,
+          color: "bg-blue-500",
+        };
       case "trailer":
-        return { text: "Sắp chiếu", variant: "secondary" as const };
+        return {
+          text: "Sắp chiếu",
+          variant: "secondary" as const,
+          color: "bg-orange-500",
+        };
       default:
-        return { text: status, variant: "outline" as const };
+        return {
+          text: status,
+          variant: "outline" as const,
+          color: "bg-gray-500",
+        };
     }
   };
 
   const status = getStatusText(movie.status);
+  const rating = movie.tmdb?.vote_average
+    ? (movie.tmdb.vote_average * 10).toFixed(0)
+    : null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Card className="container mx-auto border-none bg-gradient-to-b from-background/95 to-background/50 backdrop-blur-sm">
-        <CardContent className="p-4">
-          {/* Poster & Basic Info */}
-          <div className="flex gap-4">
-            <div className="w-[45%] max-w-96 relative">
-              <div className="relative group">
-                <Image
-                  src={`${CDN}${movie.thumb_url}`}
-                  alt={movie.name}
-                  width={300}
-                  height={450}
-                  className="w-full rounded-xl shadow-lg"
-                  priority
-                />
-                {movie.trailer_url && (
-                  <Dialog>
-                    <DialogTitle></DialogTitle>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+    <div className="relative overflow-hidden">
+      {/* Background with blur effect */}
+      <div
+        className="absolute inset-0 opacity-30 blur-3xl scale-110"
+        style={{
+          backgroundImage: `url(${CDN}${movie.thumb_url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-10"
+      >
+        <Card className="border-none bg-gradient-to-br from-background/95 via-background/90 to-background/95 backdrop-blur-xl shadow-2xl">
+          <CardContent className="p-6 lg:p-8">
+            {/* Main content */}
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+              {/* Poster section */}
+              <motion.div
+                className="flex-shrink-0 mx-auto lg:mx-0"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <div className="relative group w-64 lg:w-80">
+                  <div className="relative overflow-hidden rounded-2xl shadow-2xl group-hover:shadow-3xl transition-all duration-500">
+                    <Image
+                      src={`${CDN}${movie.thumb_url}`}
+                      alt={movie.name}
+                      width={320}
+                      height={480}
+                      className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+                      priority
+                    />
+
+                    {/* Overlay gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Quality and Status badges */}
+                    <div className="absolute top-4 right-4 flex flex-col gap-2">
+                      <Badge className="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 shadow-lg">
+                        {movie.quality}
+                      </Badge>
+                      <Badge
+                        className={`${status.color} hover:opacity-90 text-white font-semibold px-3 py-1 shadow-lg`}
                       >
-                        <PlayCircle className="w-10 h-10 text-white/90" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl p-0">
-                      <iframe
-                        src={movie.trailer_url}
-                        className="w-full aspect-video"
-                        allowFullScreen
-                      />
-                    </DialogContent>
-                  </Dialog>
-                )}
-                <div className="absolute top-2 right-2 flex flex-col gap-1.5">
-                  <Badge
-                    variant="destructive"
-                    className="text-[10px] font-medium"
-                  >
-                    {movie.quality}
-                  </Badge>
-                  <Badge
-                    variant={status.variant}
-                    className="text-[10px] font-medium"
-                  >
-                    {status.text}
-                  </Badge>
-                </div>
-              </div>
-            </div>
+                        {status.text}
+                      </Badge>
+                    </div>
 
-            <div className="flex-1 space-y-4">
-              <div className="space-y-1.5">
-                <h1 className="text-lg font-bold leading-tight">
-                  {movie.name}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {movie.original_name}
-                </p>
-                <p className="text-sm">Năm: {movie.year}</p>
-              </div>
+                    {/* Rating badge */}
+                    {rating && (
+                      <div className="absolute top-4 left-4">
+                        <div className="flex items-center gap-1 bg-black/80 backdrop-blur-sm rounded-full px-3 py-1">
+                          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                          <span className="text-white font-semibold text-sm">
+                            {rating}%
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-1.5">
-                  {movie.category.map((cat) => (
-                    <Badge
-                      key={cat.id}
-                      variant="secondary"
-                      className="text-[10px]"
+                    {/* Play trailer button */}
+                    {movie.trailer_url && (
+                      <Dialog>
+                        <DialogTitle className="sr-only">
+                          Trailer {movie.name}
+                        </DialogTitle>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute inset-0 w-full h-full bg-transparent hover:bg-black/20 text-white opacity-0 group-hover:opacity-100 transition-all duration-300"
+                          >
+                            <div className="flex flex-col items-center gap-2">
+                              <PlayCircle className="w-16 h-16 drop-shadow-lg" />
+                              <span className="text-sm font-medium">
+                                Xem Trailer
+                              </span>
+                            </div>
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl p-0 bg-black">
+                          <iframe
+                            src={movie.trailer_url}
+                            className="w-full aspect-video"
+                            allowFullScreen
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex justify-center gap-2 mt-4">
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-primary hover:bg-primary/90"
                     >
-                      {cat.name}
-                    </Badge>
-                  ))}
+                      <Heart className="w-4 h-4 mr-2" />
+                      Yêu thích
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Bookmark className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Share2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Movie details */}
+              <motion.div
+                className="flex-1 space-y-6"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                {/* Title section */}
+                <div className="space-y-3">
+                  <h1 className="text-3xl lg:text-4xl font-bold leading-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+                    {movie.name}
+                  </h1>
+                  <p className="text-lg text-muted-foreground font-medium">
+                    {movie.original_name}
+                  </p>
+
+                  {/* Quick stats */}
+                  <div className="flex flex-wrap items-center gap-4 text-sm">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      <span className="font-medium">{movie.year}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-primary" />
+                      <span>{movie.time}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Eye className="w-4 h-4 text-primary" />
+                      <span>{movie.view.toLocaleString()} lượt xem</span>
+                    </div>
+                    {movie.tmdb && (
+                      <div className="flex items-center gap-1.5">
+                        <Award className="w-4 h-4 text-primary" />
+                        <span>
+                          {movie.tmdb.vote_average.toFixed(1)}/10 TMDB
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
+                {/* Categories */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Thể loại
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {movie.category.map((cat) => (
+                      <HoverCard key={cat.id}>
+                        <HoverCardTrigger asChild>
+                          <Badge
+                            variant="secondary"
+                            className="px-3 py-1.5 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+                          >
+                            {cat.name}
+                          </Badge>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-auto">
+                          <p className="text-sm">Xem thêm phim {cat.name}</p>
+                        </HoverCardContent>
+                      </HoverCard>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Cast and crew */}
                 {(movie.director?.length > 0 || movie.actor?.length > 0) && (
-                  <div className="space-y-2 text-sm">
+                  <div className="space-y-4">
                     {movie.director?.length > 0 && (
-                      <p className="line-clamp-2">
-                        <span className="text-muted-foreground">Đạo diễn:</span>{" "}
-                        {movie.director.join(", ")}
-                      </p>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Film className="w-4 h-4 text-primary" />
+                          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                            Đạo diễn
+                          </h3>
+                        </div>
+                        <p className="text-foreground font-medium">
+                          {movie.director.join(", ")}
+                        </p>
+                      </div>
                     )}
+
                     {movie.actor?.length > 0 && (
-                      <p className="line-clamp-2">
-                        <span className="text-muted-foreground">
-                          Diễn viên:
-                        </span>{" "}
-                        {movie.actor.join(", ")}
-                      </p>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-primary" />
+                          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                            Diễn viên
+                          </h3>
+                        </div>
+                        <p className="text-foreground leading-relaxed">
+                          {movie.actor.slice(0, 5).join(", ")}
+                          {movie.actor.length > 5 && (
+                            <HoverCard>
+                              <HoverCardTrigger asChild>
+                                <Button
+                                  variant="link"
+                                  className="p-0 h-auto text-primary"
+                                >
+                                  {" "}
+                                  và {movie.actor.length - 5} người khác
+                                </Button>
+                              </HoverCardTrigger>
+                              <HoverCardContent className="w-80">
+                                <p className="text-sm">
+                                  {movie.actor.slice(5).join(", ")}
+                                </p>
+                              </HoverCardContent>
+                            </HoverCard>
+                          )}
+                        </p>
+                      </div>
                     )}
                   </div>
                 )}
-              </div>
-
-              <div className="mt-3 space-y-2 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>{movie.time}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Star className="w-3.5 h-3.5 text-yellow-500" />
-                  <span>{movie.view.toLocaleString()} lượt xem</span>
-                </div>
-                {movie.tmdb && (
-                  <div className="flex items-center gap-1.5">
-                    <Star className="w-3.5 h-3.5 text-yellow-500" />
-                    <span>{movie.tmdb.vote_average.toFixed(1)}/10</span>
-                  </div>
-                )}
-              </div>
+              </motion.div>
             </div>
-          </div>
 
-          {/* Synopsis */}
-          <div className="mt-6">
-            <h3 className="text-base font-medium mb-2">Nội dung phim</h3>
-            <div
-              className="text-sm text-muted-foreground"
-              dangerouslySetInnerHTML={{ __html: movie.content }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+            {/* Synopsis */}
+            <motion.div
+              className="mt-8 space-y-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <h3 className="text-xl font-bold">Nội dung phim</h3>
+              <div className="prose prose-slate dark:prose-invert max-w-none">
+                <div
+                  className="text-muted-foreground leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: movie.content }}
+                />
+              </div>
+            </motion.div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
   );
 }

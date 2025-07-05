@@ -4,7 +4,7 @@ import M3U8Player from "@/components/M3U8Player";
 import VideoPlayer from "@/components/VideoPlayer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { X, Play, SkipBack, SkipForward, RotateCcw } from "lucide-react";
 import { type ServerEpisode } from "@/types/common";
 import { useState, useEffect } from "react";
 
@@ -39,6 +39,10 @@ interface VideoControlsProps {
   hasPrev?: boolean;
   hasNext?: boolean;
   onClose: () => void;
+  episode: ServerEpisode["server_data"][0];
+  serverName?: string;
+  currentIndex?: number;
+  totalEpisodes?: number;
 }
 
 function VideoControls({
@@ -47,84 +51,127 @@ function VideoControls({
   hasPrev,
   hasNext,
   onClose,
-}: VideoControlsProps) {
-  return (
-    <div className="absolute inset-0 pointer-events-none group-hover:opacity-100 opacity-0 transition-opacity duration-200 z-20">
-      {/* Previous button */}
-      {hasPrev && (
-        <div className="absolute inset-y-0 left-0 flex items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-12 w-12 ml-4 bg-background/80 hover:bg-background/90 backdrop-blur-sm pointer-events-auto shadow-lg"
-            onClick={onPrev}
-          >
-            <ChevronLeft className="h-8 w-8" />
-          </Button>
-        </div>
-      )}
-
-      {/* Next button */}
-      {hasNext && (
-        <div className="absolute inset-y-0 right-0 flex items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-12 w-12 mr-4 bg-background/80 hover:bg-background/90 backdrop-blur-sm pointer-events-auto shadow-lg"
-            onClick={onNext}
-          >
-            <ChevronRight className="h-8 w-8" />
-          </Button>
-        </div>
-      )}
-
-      {/* Close button */}
-      <div className="absolute top-4 right-4">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-10 w-10 bg-background/80 hover:bg-background/90 backdrop-blur-sm pointer-events-auto shadow-lg"
-          onClick={onClose}
-        >
-          <X className="h-6 w-6" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-interface EpisodeInfoOverlayProps {
-  episode: ServerEpisode["server_data"][0];
-  serverName?: string;
-  currentIndex?: number;
-  totalEpisodes?: number;
-}
-
-function EpisodeInfoOverlay({
   episode,
   serverName,
   currentIndex,
   totalEpisodes,
-}: EpisodeInfoOverlayProps) {
-  return (
-    <div className="absolute bottom-4 left-4 right-4 pointer-events-none pb-16 group-hover:opacity-100 opacity-0 transition-opacity duration-200 z-10">
-      <div className="bg-background/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-lg w-fit pointer-events-auto">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium text-sm">{episode.name}</p>
-            {serverName && (
-              <p className="text-xs text-muted-foreground">
-                Server: {serverName}
-              </p>
-            )}
-          </div>
+}: VideoControlsProps) {
+  const [showControls, setShowControls] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
-          {currentIndex !== undefined && totalEpisodes !== undefined && (
-            <Badge variant="secondary" className="text-xs">
-              {currentIndex + 1}/{totalEpisodes}
-            </Badge>
-          )}
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    if (!isHovering) {
+      timeout = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    } else {
+      setShowControls(true);
+    }
+
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [isHovering]);
+
+  return (
+    <div
+      className="absolute inset-0 z-30 pointer-events-none"
+      onMouseEnter={() => {
+        setIsHovering(true);
+        setShowControls(true);
+      }}
+      onMouseLeave={() => {
+        setIsHovering(false);
+      }}
+      onMouseMove={() => {
+        setIsHovering(true);
+        setShowControls(true);
+      }}
+    >
+      {/* Top gradient overlay */}
+      <div
+        className={`absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-300 ${
+          showControls ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        {/* Close button */}
+        <div className="absolute top-3 right-3 pointer-events-auto">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 bg-black/40 hover:bg-black/60 text-white border-none backdrop-blur-sm"
+            onClick={onClose}
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
+
+        {/* Episode info */}
+        <div className="absolute top-3 left-3 max-w-md pointer-events-none">
+          <div className="bg-black/40 backdrop-blur-sm rounded-md px-3 py-1.5">
+            <h3 className="text-white font-medium text-sm line-clamp-1">
+              {episode.name}
+            </h3>
+            <div className="flex items-center gap-2 mt-0.5">
+              {serverName && (
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-white/15 text-white border-none px-2 py-0.5"
+                >
+                  {serverName}
+                </Badge>
+              )}
+              {currentIndex !== undefined && totalEpisodes !== undefined && (
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-white/15 text-white border-none px-2 py-0.5"
+                >
+                  {currentIndex + 1}/{totalEpisodes}
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Side navigation - only show when hovering edges */}
+      <div
+        className={`absolute inset-y-0 left-0 right-0 flex items-center justify-between transition-opacity duration-300 ${
+          showControls ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        {/* Previous button */}
+        {hasPrev && (
+          <div className="w-20 flex items-center justify-start pl-3 pointer-events-auto">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-12 w-12 bg-black/40 hover:bg-black/60 text-white border-none shadow-lg backdrop-blur-sm"
+              onClick={onPrev}
+            >
+              <SkipBack className="h-6 w-6" />
+            </Button>
+          </div>
+        )}
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Next button */}
+        {hasNext && (
+          <div className="w-20 flex items-center justify-end pr-3 pointer-events-auto">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-12 w-12 bg-black/40 hover:bg-black/60 text-white border-none shadow-lg backdrop-blur-sm"
+              onClick={onNext}
+            >
+              <SkipForward className="h-6 w-6" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -144,21 +191,28 @@ export default function EnhancedVideoDialog({
   hasNext = false,
   currentEpisodeIndex,
   totalEpisodes,
-  showEpisodeInfo = true,
   showControls = true,
   className = "",
 }: EnhancedVideoDialogProps) {
   const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   // Reset player ready state when episode changes
   useEffect(() => {
     if (episode) {
       setIsPlayerReady(false);
+      setHasError(false);
       // Small delay to ensure player is properly initialized
       const timer = setTimeout(() => setIsPlayerReady(true), 100);
       return () => clearTimeout(timer);
     }
   }, [episode]);
+
+  const handleRetry = () => {
+    setHasError(false);
+    setIsPlayerReady(false);
+    setTimeout(() => setIsPlayerReady(true), 100);
+  };
 
   return (
     <Dialog
@@ -171,12 +225,13 @@ export default function EnhancedVideoDialog({
         {episode ? `Đang phát: ${episode.name}` : "Trình phát video"}
       </DialogTitle>
       <DialogContent
-        className={`max-w-6xl p-0 overflow-hidden ${className}`}
+        className={`max-w-7xl w-[95vw] p-0 overflow-hidden bg-black video-dialog-content ${className}`}
         onInteractOutside={(e) => e.preventDefault()}
       >
-        <div className="aspect-video relative group bg-black">
-          {episode && isPlayerReady && (
-            <>
+        <div className="aspect-video relative bg-black group">
+          {/* Video player container - full interaction */}
+          {episode && isPlayerReady && !hasError && (
+            <div className="absolute inset-0 z-10">
               {episode.link_m3u8 ? (
                 <M3U8Player
                   src={episode.link_m3u8}
@@ -192,33 +247,72 @@ export default function EnhancedVideoDialog({
                   initialTime={initialTime}
                 />
               )}
-            </>
+            </div>
           )}
 
           {/* Loading state */}
-          {!isPlayerReady && episode && (
-            <div className="absolute inset-0 bg-black flex items-center justify-center">
-              <div className="text-white text-center">
-                <div className="animate-spin h-8 w-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
-                <p>Đang tải video...</p>
+          {!isPlayerReady && episode && !hasError && (
+            <div className="absolute inset-0 bg-black flex items-center justify-center z-20">
+              <div className="text-white text-center space-y-4">
+                <div className="relative">
+                  <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"></div>
+                  <Play className="w-6 h-6 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-primary" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold">Đang tải video...</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Vui lòng đợi một chút
+                  </p>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Navigation controls */}
-          {showControls && (
+          {/* Error state */}
+          {hasError && episode && (
+            <div className="absolute inset-0 bg-black flex items-center justify-center z-20">
+              <div className="text-white text-center space-y-4 max-w-md mx-auto px-4">
+                <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
+                  <X className="w-8 h-8 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold">Không thể phát video</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Có lỗi xảy ra khi tải video. Vui lòng thử lại hoặc chọn
+                    server khác.
+                  </p>
+                </div>
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                    onClick={handleRetry}
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Thử lại
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                    onClick={onClose}
+                  >
+                    Đóng
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Custom video controls overlay */}
+          {showControls && episode && isPlayerReady && !hasError && (
             <VideoControls
               onPrev={onPrev}
               onNext={onNext}
               hasPrev={hasPrev}
               hasNext={hasNext}
               onClose={onClose}
-            />
-          )}
-
-          {/* Episode info overlay */}
-          {showEpisodeInfo && episode && (
-            <EpisodeInfoOverlay
               episode={episode}
               serverName={serverName}
               currentIndex={currentEpisodeIndex}

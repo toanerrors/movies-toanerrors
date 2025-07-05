@@ -14,13 +14,15 @@ async function MovieDetail({ params }: Props) {
   const data = res?.data;
 
   if (!data) return notFound();
-  // OK
+
   return (
-    <main className="space-y-8 py-6 container mx-auto px-4 min-h-screen">
-      <MovieInfo movie={data.item} />
-      {data.item.episodes.length > 0 && (
-        <EpisodeList episodes={data.item.episodes} movieSlug={slug} />
-      )}
+    <main className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="container mx-auto px-4 py-6 space-y-8 max-w-7xl">
+        <MovieInfo movie={data.item} />
+        {data.item.episodes.length > 0 && (
+          <EpisodeList episodes={data.item.episodes} movieSlug={slug} />
+        )}
+      </div>
     </main>
   );
 }
