@@ -3,16 +3,16 @@
 import React, { useRef, useEffect, useState } from "react";
 import Hls from "hls.js";
 import {
-  Play,
-  Pause,
+  PlayCircle,
+  PauseCircle,
   Volume2,
   VolumeX,
-  Maximize,
+  Maximize2,
+  Minimize2,
   RotateCcw,
-  X,
-  SkipBack,
-  SkipForward,
-  Minimize,
+  XCircle,
+  ChevronLeftCircle,
+  ChevronRightCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -319,7 +319,7 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
       >
         <video
           ref={videoRef}
-          className="w-full h-full bg-black"
+          className="w-full h-full bg-black rounded-xl shadow-lg"
           style={{ aspectRatio: "16/9" }}
           playsInline
           onClick={(e) => {
@@ -327,56 +327,46 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
             togglePlayPause();
           }}
         />
-        {/* Custom Controls Overlay */}
+        {/* Redesigned Controls Overlay */}
         <div className={`absolute inset-0 z-20 pointer-events-none`}>
-          {/* Top gradient overlay: Close, Info, Server, Tập */}
+          {/* Top bar: Close, Info */}
           <div
-            className={`absolute z-30 top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-300 ${
+            className={`absolute z-30 top-0 left-0 right-0 flex items-center justify-between px-6 h-16 bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${
               showControls ? "opacity-100" : "opacity-0"
             }`}
             style={{ pointerEvents: "auto" }}
           >
-            {/* Close button */}
-            {onClose && (
-              <div className="absolute top-3 right-3">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-10 w-10 bg-black/40 hover:bg-black/60 text-white border-none backdrop-blur-sm"
-                      onClick={onClose}
-                    >
-                      <X className="h-6 w-6" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Đóng</TooltipContent>
-                </Tooltip>
-              </div>
-            )}
-            {/* Episode info */}
-            <div className="absolute top-3 left-3 max-w-md">
-              <div className="bg-black/40 backdrop-blur-sm rounded-md px-3 py-1.5">
-                <h3 className="text-white font-medium text-sm line-clamp-1">
-                  {episodeName}
-                </h3>
-                <div className="flex items-center gap-2 mt-0.5">
-                  {serverName && (
-                    <span className="text-xs bg-white/15 text-white border-none px-2 py-0.5 rounded">
-                      {serverName}
-                    </span>
-                  )}
-                  {currentIndex !== undefined &&
-                    totalEpisodes !== undefined && (
-                      <span className="text-xs bg-white/15 text-white border-none px-2 py-0.5 rounded">
-                        {currentIndex + 1}/{totalEpisodes}
-                      </span>
-                    )}
-                </div>
+            {/* Info */}
+            <div className="flex flex-col gap-1 max-w-xs">
+              <span className="text-white font-semibold text-base truncate">
+                {episodeName}
+              </span>
+              <div className="flex items-center gap-2">
+                {serverName && (
+                  <span className="text-xs bg-white/20 text-white rounded px-2 py-0.5">
+                    {serverName}
+                  </span>
+                )}
+                {currentIndex !== undefined && totalEpisodes !== undefined && (
+                  <span className="text-xs bg-white/20 text-white rounded px-2 py-0.5">
+                    {currentIndex + 1}/{totalEpisodes}
+                  </span>
+                )}
               </div>
             </div>
+            {/* Close button */}
+            {onClose && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 bg-black/50 hover:bg-black/70 text-white border-none backdrop-blur-md shadow-lg"
+                onClick={onClose}
+              >
+                <XCircle className="h-7 w-7" />
+              </Button>
+            )}
           </div>
-          {/* Side navigation - only show when hovering edges */}
+          {/* Side navigation */}
           <div
             className={`absolute inset-y-0 left-0 right-0 flex items-center justify-between transition-opacity duration-300 ${
               showControls ? "opacity-100" : "opacity-0"
@@ -385,148 +375,50 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
           >
             {/* Previous button */}
             {hasPrev && onPrev && (
-              <div className="w-20 flex items-center justify-start pl-3">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-14 w-14 bg-black/40 hover:bg-black/60 text-white border-none shadow-lg backdrop-blur-sm"
-                      onClick={onPrev}
-                    >
-                      <SkipBack className="h-8 w-8" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Tập trước</TooltipContent>
-                </Tooltip>
+              <div className="w-24 flex items-center justify-start pl-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-14 w-14 bg-black/50 hover:bg-black/70 text-white border-none shadow-xl backdrop-blur-md"
+                  onClick={onPrev}
+                >
+                  <ChevronLeftCircle className="h-10 w-10" />
+                </Button>
               </div>
             )}
             <div className="flex-1" />
             {/* Next button */}
             {hasNext && onNext && (
-              <div className="w-20 flex items-center justify-end pr-3">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-14 w-14 bg-black/40 hover:bg-black/60 text-white border-none shadow-lg backdrop-blur-sm"
-                      onClick={onNext}
-                    >
-                      <SkipForward className="h-8 w-8" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Tập tiếp</TooltipContent>
-                </Tooltip>
+              <div className="w-24 flex items-center justify-end pr-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-14 w-14 bg-black/50 hover:bg-black/70 text-white border-none shadow-xl backdrop-blur-md"
+                  onClick={onNext}
+                >
+                  <ChevronRightCircle className="h-10 w-10" />
+                </Button>
               </div>
             )}
           </div>
-          {/* Bottom controls (play, volume, fullscreen) */}
+          {/* Bottom controls */}
           <div
-            className={`absolute bottom-8 left-0 right-0 px-4 pb-2 flex items-center justify-between transition-opacity duration-300 ${
+            className={`absolute bottom-0 left-0 right-0 px-6 pb-4 flex flex-col gap-2 transition-opacity duration-300 ${
               showControls ? "opacity-100" : "opacity-0"
             }`}
             style={{ pointerEvents: "auto" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2">
-              {/* Play/Pause Button */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-14 w-14 text-white hover:bg-white/20"
-                    onClick={togglePlayPause}
-                  >
-                    {isPlaying ? (
-                      <Pause className="h-8 w-8" />
-                    ) : (
-                      <Play className="h-8 w-8" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {isPlaying ? "Tạm dừng" : "Phát"}
-                </TooltipContent>
-              </Tooltip>
-              {/* Volume Controls */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 text-white hover:bg-white/20"
-                    onClick={toggleMute}
-                  >
-                    {isMuted || volume === 0 ? (
-                      <VolumeX className="h-6 w-6" />
-                    ) : (
-                      <Volume2 className="h-6 w-6" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {isMuted ? "Bật tiếng" : "Tắt tiếng"}
-                </TooltipContent>
-              </Tooltip>
-              <div className="w-24 hidden sm:block">
-                <Progress
-                  value={isMuted ? 0 : volume * 100}
-                  max={100}
-                  className="h-2 bg-white/20"
-                  style={{ minWidth: 60 }}
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={isMuted ? 0 : volume * 100}
-                  onChange={(e) =>
-                    handleVolumeChange([parseFloat(e.target.value)])
-                  }
-                  className="absolute left-0 top-0 w-full h-2 opacity-0 cursor-pointer"
-                  style={{ minWidth: 60 }}
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* Fullscreen Button */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 text-white hover:bg-white/20"
-                    onClick={toggleFullscreen}
-                  >
-                    {isFullscreen ? (
-                      <Minimize className="h-6 w-6" />
-                    ) : (
-                      <Maximize className="h-6 w-6" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {isFullscreen ? "Thu nhỏ" : "Toàn màn hình"}
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
-          {/* Progress Bar dưới cùng */}
-          <div
-            className="absolute bottom-0 left-0 right-0 px-4 pb-2 z-50"
-            style={{ pointerEvents: "auto" }}
-          >
-            <div className="flex items-center gap-2 relative">
-              <span className="text-white text-xs min-w-[40px] text-right">
+            {/* Progress Bar */}
+            <div className="flex items-center gap-3">
+              <span className="text-white text-xs min-w-[44px] text-right">
                 {formatTime(currentTime)}
               </span>
               <div className="flex-1 relative">
                 <Progress
                   value={duration ? (currentTime / duration) * 100 : 0}
                   max={100}
-                  className="h-2 bg-white/20"
+                  className="h-2 bg-white/30 rounded-full"
                 />
                 <input
                   type="range"
@@ -538,9 +430,74 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
                   style={{ pointerEvents: "auto" }}
                 />
               </div>
-              <span className="text-white text-xs min-w-[40px] text-left">
+              <span className="text-white text-xs min-w-[44px] text-left">
                 {formatTime(duration)}
               </span>
+            </div>
+            {/* Main Controls Row */}
+            <div className="flex items-center justify-between gap-4 mt-1">
+              <div className="flex items-center gap-2">
+                {/* Play/Pause Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-14 w-14 text-white hover:bg-white/20"
+                  onClick={togglePlayPause}
+                >
+                  {isPlaying ? (
+                    <PauseCircle className="h-10 w-10" />
+                  ) : (
+                    <PlayCircle className="h-10 w-10" />
+                  )}
+                </Button>
+                {/* Volume Controls */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 text-white hover:bg-white/20"
+                  onClick={toggleMute}
+                >
+                  {isMuted || volume === 0 ? (
+                    <VolumeX className="h-7 w-7" />
+                  ) : (
+                    <Volume2 className="h-7 w-7" />
+                  )}
+                </Button>
+                <div className="w-24 hidden sm:block relative">
+                  <Progress
+                    value={isMuted ? 0 : volume * 100}
+                    max={100}
+                    className="h-2 bg-white/30 rounded-full"
+                    style={{ minWidth: 60 }}
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={isMuted ? 0 : volume * 100}
+                    onChange={(e) =>
+                      handleVolumeChange([parseFloat(e.target.value)])
+                    }
+                    className="absolute left-0 top-0 w-full h-2 opacity-0 cursor-pointer"
+                    style={{ minWidth: 60 }}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Fullscreen Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 text-white hover:bg-white/20"
+                  onClick={toggleFullscreen}
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="h-7 w-7" />
+                  ) : (
+                    <Maximize2 className="h-7 w-7" />
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -550,19 +507,19 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-16 w-16 bg-black/40 hover:bg-black/60 text-white border-none backdrop-blur-sm rounded-full"
+              className="h-20 w-20 bg-black/60 hover:bg-black/80 text-white border-none backdrop-blur-lg rounded-full shadow-2xl"
               onClick={togglePlayPause}
             >
-              <Play className="h-8 w-8" />
+              <PlayCircle className="h-12 w-12" />
             </Button>
           </div>
         )}
         {/* Loading Indicator */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60">
             <div className="text-white text-center space-y-4">
-              <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
-              <p className="text-sm">Đang tải...</p>
+              <div className="w-14 h-14 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+              <p className="text-base font-medium">Đang tải...</p>
             </div>
           </div>
         )}
