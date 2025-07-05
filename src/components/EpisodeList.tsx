@@ -17,6 +17,7 @@ import {
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import VideoPlayer from "./VideoPlayer";
 import M3U8Player from "./M3U8Player";
+import VideoDialog from "@/components/VideoDialog";
 
 function formatLastWatched(time: number) {
   return new Date(time).toLocaleString();
@@ -48,59 +49,71 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
   const intervalRef = useRef<NodeJS.Timeout>(null);
   const [videoEnded, setVideoEnded] = useState(false);
 
-  const findPreviousEpisode = () => {
-    if (!selectedEpisode) return null;
-    const currentServer = episodes.find((s) =>
-      s.server_data.includes(selectedEpisode)
-    );
-    if (!currentServer) return null;
+  // --- New: VideoDialog state and navigation helpers ---
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
+  const [currentEpisode, setCurrentEpisode] = useState<
+    ServerEpisode["server_data"][0] | null
+  >(null);
 
-    const currentIndex = currentServer.server_data.findIndex(
-      (ep) => ep.slug === selectedEpisode.slug
+  // Find current server and index for navigation
+  const getCurrentServerAndIndex = () => {
+    if (!currentEpisode) return { server: null, index: -1 };
+    const server = episodes.find((s) =>
+      s.server_data.some((ep) => ep.slug === currentEpisode.slug)
     );
-    return currentServer.server_data[currentIndex - 1] || null;
+    if (!server) return { server: null, index: -1 };
+    const index = server.server_data.findIndex(
+      (ep) => ep.slug === currentEpisode.slug
+    );
+    return { server, index };
   };
 
-  const findNextEpisode = () => {
-    if (!selectedEpisode) return null;
-    const currentServer = episodes.find((s) =>
-      s.server_data.includes(selectedEpisode)
-    );
-    if (!currentServer) return null;
-
-    const currentIndex = currentServer.server_data.findIndex(
-      (ep) => ep.slug === selectedEpisode.slug
-    );
-    return currentServer.server_data[currentIndex + 1] || null;
+  const handleOpenEpisode = (ep: ServerEpisode["server_data"][0]) => {
+    setCurrentEpisode(ep);
+    setVideoDialogOpen(true);
   };
 
-  const handlePreviousEpisode = () => {
-    const prevEp = findPreviousEpisode();
-    if (prevEp) {
-      setSelectedEpisode(prevEp);
-      setVideoEnded(false);
+  const handleCloseDialog = () => {
+    setVideoDialogOpen(false);
+    setCurrentEpisode(null);
+  };
+
+  const handlePrev = () => {
+    const { server, index } = getCurrentServerAndIndex();
+    if (server && index > 0) {
+      setCurrentEpisode(server.server_data[index - 1]);
     }
   };
-
-  const handleNextEpisode = () => {
-    const nextEp = findNextEpisode();
-    if (nextEp) {
-      setSelectedEpisode(nextEp);
-      setVideoEnded(false);
+  const handleNext = () => {
+    const { server, index } = getCurrentServerAndIndex();
+    if (server && index < server.server_data.length - 1) {
+      setCurrentEpisode(server.server_data[index + 1]);
     }
   };
+  const hasPrev = () => {
+    const { index } = getCurrentServerAndIndex();
+    return index > 0;
+  };
+  const hasNext = () => {
+    const { server, index } = getCurrentServerAndIndex();
+    return server ? index < server.server_data.length - 1 : false;
+  };
 
+  // --- Optimize: Save watch history only if timestamp changed ---
+  const lastSavedTimestamp = useRef<number | undefined>(undefined);
   const handleTimeUpdate = (time: number) => {
-    if (selectedEpisode) {
+    if (currentEpisode && lastSavedTimestamp.current !== time) {
       saveWatchHistory({
         movieSlug,
-        episodeSlug: selectedEpisode.slug,
+        episodeSlug: currentEpisode.slug,
         timestamp: time,
         lastWatched: Date.now(),
         serverName:
-          episodes.find((s) => s.server_data.includes(selectedEpisode))
-            ?.server_name || "",
+          episodes.find((s) =>
+            s.server_data.some((ep) => ep.slug === currentEpisode.slug)
+          )?.server_name || "",
       });
+      lastSavedTimestamp.current = time;
     }
   };
 
@@ -184,7 +197,6 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
               </TabsList>
               <ScrollBar orientation="horizontal" className="h-1.5" />
             </ScrollArea>
-
             {episodes.map((server) => (
               <TabsContent
                 key={server.server_name}
@@ -193,10 +205,6 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
               >
                 <div className="flex flex-wrap gap-2">
                   {server.server_data.map((episode, index) => {
-                    const progress = getEpisodeProgress(
-                      movieSlug,
-                      episode.slug
-                    );
                     return (
                       <motion.div
                         key={episode.slug}
@@ -215,16 +223,7 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                               ? "ring-2 ring-destructive bg-destructive/20 font-bold"
                               : ""
                           }`}
-                          onClick={() => {
-                            saveWatchHistory({
-                              movieSlug,
-                              episodeSlug: episode.slug,
-                              timestamp: 0,
-                              lastWatched: Date.now(),
-                              serverName: server.server_name,
-                            });
-                            setSelectedEpisode(episode);
-                          }}
+                          onClick={() => handleOpenEpisode(episode)}
                         >
                           <span>{episode.name}</span>
                           {getEpisodeStatus(episode).isWatched && (
@@ -240,60 +239,23 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
           </Tabs>
         </CardContent>
       </Card>
-
-      <Dialog
-        open={!!selectedEpisode}
-        onOpenChange={() => setSelectedEpisode(null)}
-      >
-        <DialogTitle className="p-2"></DialogTitle>
-        <DialogContent className="max-w-5xl p-0 overflow-hidden">
-          <div className="aspect-video relative group">
-            {selectedEpisode &&
-              (selectedEpisode.link_m3u8 ? (
-                <M3U8Player
-                  src={selectedEpisode.link_m3u8}
-                  onTimeUpdate={handleTimeUpdate}
-                  onEnded={handleNextEpisode}
-                  initialTime={progress?.timestamp}
-                />
-              ) : (
-                <VideoPlayer
-                  src={selectedEpisode.link_embed}
-                  onTimeUpdate={handleTimeUpdate}
-                  onEnded={handleNextEpisode}
-                  initialTime={progress?.timestamp}
-                />
-              ))}
-
-            {/* Navigation overlay */}
-            <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="absolute inset-y-0 left-0 flex items-center">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-12 w-12 ml-4 bg-background/70 hover:bg-background/90 pointer-events-auto"
-                  onClick={handlePreviousEpisode}
-                  disabled={!findPreviousEpisode()}
-                >
-                  <ChevronLeft className="h-8 w-8" />
-                </Button>
-              </div>
-
-              <div className="absolute inset-y-0 right-0 flex items-center ">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-12 w-12 mr-4 bg-background/70 hover:bg-background/90 pointer-events-auto"
-                  onClick={handleNextEpisode}
-                  disabled={!findNextEpisode()}
-                >
-                  <ChevronRight className="h-8 w-8" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* --- VideoDialog extracted --- */}
+      <VideoDialog
+        open={videoDialogOpen}
+        episode={currentEpisode}
+        onClose={handleCloseDialog}
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={handleNext}
+        initialTime={
+          currentEpisode
+            ? getEpisodeProgress(movieSlug, currentEpisode.slug)?.timestamp
+            : 0
+        }
+        onPrev={handlePrev}
+        onNext={handleNext}
+        hasPrev={hasPrev()}
+        hasNext={hasNext()}
+      />
     </>
   );
 }
