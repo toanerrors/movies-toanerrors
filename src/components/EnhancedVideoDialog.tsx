@@ -49,7 +49,7 @@ function VideoControls({
   onClose,
 }: VideoControlsProps) {
   return (
-    <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+    <div className="absolute inset-0 pointer-events-none group-hover:opacity-100 opacity-0 transition-opacity duration-200 z-20">
       {/* Previous button */}
       {hasPrev && (
         <div className="absolute inset-y-0 left-0 flex items-center">
@@ -107,8 +107,8 @@ function EpisodeInfoOverlay({
   totalEpisodes,
 }: EpisodeInfoOverlayProps) {
   return (
-    <div className="absolute bottom-4 left-4 right-4 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-      <div className="bg-background/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-lg">
+    <div className="absolute bottom-4 left-4 right-4 pointer-events-none pb-16 group-hover:opacity-100 opacity-0 transition-opacity duration-200 z-10">
+      <div className="bg-background/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-lg w-fit pointer-events-auto">
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium text-sm">{episode.name}</p>
@@ -161,11 +161,19 @@ export default function EnhancedVideoDialog({
   }, [episode]);
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogTitle className="sr-only">
         {episode ? `Đang phát: ${episode.name}` : "Trình phát video"}
       </DialogTitle>
-      <DialogContent className={`max-w-6xl p-0 overflow-hidden ${className}`}>
+      <DialogContent
+        className={`max-w-6xl p-0 overflow-hidden ${className}`}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <div className="aspect-video relative group bg-black">
           {episode && isPlayerReady && (
             <>
