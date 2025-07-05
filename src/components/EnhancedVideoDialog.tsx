@@ -121,6 +121,11 @@ function VideoControls({
           setShowControls(true);
         }
       }}
+      onClick={() => {
+        if (alwaysShow) {
+          setShowControls(!showControls);
+        }
+      }}
     >
       {/* Top gradient overlay */}
       <div
@@ -272,6 +277,15 @@ export default function EnhancedVideoDialog({
                   onTimeUpdate={onTimeUpdate}
                   onEnded={onEnded}
                   initialTime={initialTime}
+                  onPrev={onPrev}
+                  onNext={onNext}
+                  hasPrev={hasPrev}
+                  hasNext={hasNext}
+                  onClose={onClose}
+                  episodeName={episode.name}
+                  serverName={serverName}
+                  currentIndex={currentEpisodeIndex}
+                  totalEpisodes={totalEpisodes}
                 />
               ) : (
                 <VideoPlayer
@@ -340,19 +354,23 @@ export default function EnhancedVideoDialog({
           )}
 
           {/* Custom video controls overlay */}
-          {showControls && episode && isPlayerReady && !hasError && (
-            <VideoControls
-              onPrev={onPrev}
-              onNext={onNext}
-              hasPrev={hasPrev}
-              hasNext={hasNext}
-              onClose={onClose}
-              episode={episode}
-              serverName={serverName}
-              currentIndex={currentEpisodeIndex}
-              totalEpisodes={totalEpisodes}
-            />
-          )}
+          {!episode?.link_m3u8 &&
+            showControls &&
+            episode &&
+            isPlayerReady &&
+            !hasError && (
+              <VideoControls
+                onPrev={onPrev}
+                onNext={onNext}
+                hasPrev={hasPrev}
+                hasNext={hasNext}
+                onClose={onClose}
+                episode={episode}
+                serverName={serverName}
+                currentIndex={currentEpisodeIndex}
+                totalEpisodes={totalEpisodes}
+              />
+            )}
         </div>
       </DialogContent>
     </Dialog>
