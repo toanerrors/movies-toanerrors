@@ -8,8 +8,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import { Badge } from "./ui/badge";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   getWatchHistory,
   getEpisodeProgress,
@@ -17,6 +16,7 @@ import {
 } from "@/lib/watch-history";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import VideoPlayer from "./VideoPlayer";
+import M3U8Player from "./M3U8Player";
 
 function formatLastWatched(time: number) {
   return new Date(time).toLocaleString();
@@ -248,14 +248,22 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
         <DialogTitle className="p-2"></DialogTitle>
         <DialogContent className="max-w-5xl p-0 overflow-hidden">
           <div className="aspect-video relative group">
-            {selectedEpisode && (
-              <VideoPlayer
-                src={selectedEpisode.link_embed}
-                onTimeUpdate={handleTimeUpdate}
-                onEnded={handleNextEpisode}
-                initialTime={progress?.timestamp}
-              />
-            )}
+            {selectedEpisode &&
+              (selectedEpisode.link_m3u8 ? (
+                <M3U8Player
+                  src={selectedEpisode.link_m3u8}
+                  onTimeUpdate={handleTimeUpdate}
+                  onEnded={handleNextEpisode}
+                  initialTime={progress?.timestamp}
+                />
+              ) : (
+                <VideoPlayer
+                  src={selectedEpisode.link_embed}
+                  onTimeUpdate={handleTimeUpdate}
+                  onEnded={handleNextEpisode}
+                  initialTime={progress?.timestamp}
+                />
+              ))}
 
             {/* Navigation overlay */}
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
