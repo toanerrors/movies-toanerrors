@@ -5,7 +5,7 @@ import Hls from "hls.js";
 
 interface M3U8PlayerProps {
   src: string;
-  onTimeUpdate?: (time: number) => void;
+  onTimeUpdate?: (time: number, duration?: number) => void;
   onEnded?: () => void;
   initialTime?: number;
 }
@@ -63,7 +63,7 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
     const video = videoRef.current;
     if (!video) return;
     const handleTimeUpdate = () => {
-      onTimeUpdate?.(video.currentTime);
+      onTimeUpdate?.(video.currentTime, video.duration);
     };
     const handleEnded = () => {
       onEnded?.();

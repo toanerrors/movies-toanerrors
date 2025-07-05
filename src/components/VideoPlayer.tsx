@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 interface VideoPlayerProps {
   src: string;
-  onTimeUpdate?: (time: number) => void;
+  onTimeUpdate?: (time: number, duration?: number) => void;
   onEnded?: () => void;
   initialTime?: number;
 }
@@ -23,7 +23,7 @@ export default function VideoPlayer({
       try {
         const data = JSON.parse(event.data);
         if (data.event === "timeupdate") {
-          onTimeUpdate?.(data.currentTime);
+          onTimeUpdate?.(data.currentTime, data.duration);
         }
         if (data.event === "ended") {
           onEnded?.();

@@ -140,4 +140,6 @@ export interface WatchHistoryItem {
   timestamp: number;
   lastWatched: number;
   serverName: string;
+  isCompleted?: boolean;
+  duration?: number; // Total episode duration for completion calculation
 }

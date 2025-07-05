@@ -3,20 +3,23 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import M3U8Player from "@/components/M3U8Player";
 import VideoPlayer from "@/components/VideoPlayer";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { type ServerEpisode } from "@/types/common";
+import { useState, useEffect } from "react";
 
 interface VideoDialogProps {
   open: boolean;
   episode: ServerEpisode["server_data"][0] | null;
   onClose: () => void;
-  onTimeUpdate?: (time: number) => void;
+  onTimeUpdate?: (time: number, duration?: number) => void;
   onEnded?: () => void;
   initialTime?: number;
   onPrev?: () => void;
   onNext?: () => void;
   hasPrev?: boolean;
   hasNext?: boolean;
+  isAutoPlaying?: boolean;
+  onCancelAutoPlay?: () => void;
 }
 
 export default function VideoDialog({
@@ -30,10 +33,36 @@ export default function VideoDialog({
   onNext,
   hasPrev,
   hasNext,
+  isAutoPlaying = false,
+  onCancelAutoPlay,
 }: VideoDialogProps) {
+  const [countdown, setCountdown] = useState(0);
+
+  // Auto-play countdown
+  useEffect(() => {
+    if (isAutoPlaying && hasNext) {
+      setCountdown(3);
+      const interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(interval);
+    } else {
+      setCountdown(0);
+    }
+  }, [isAutoPlaying, hasNext]);
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogTitle className="p-2"></DialogTitle>
+      <DialogTitle className="sr-only">
+        {episode ? `Playing: ${episode.name}` : "Video Player"}
+      </DialogTitle>
       <DialogContent className="max-w-5xl p-0 overflow-hidden">
         <div className="aspect-video relative group">
           {episode &&
@@ -53,8 +82,22 @@ export default function VideoDialog({
               />
             ))}
 
+          {/* Auto-play countdown overlay */}
+          {isAutoPlaying && countdown > 0 && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-background/90 p-6 rounded-lg text-center space-y-4">
+                <h3 className="text-lg font-semibold">Tự động chuyển tập</h3>
+                <div className="text-3xl font-bold">{countdown}</div>
+                <Button onClick={onCancelAutoPlay} variant="outline">
+                  Hủy
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Navigation overlay */}
           <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Previous button */}
             <div className="absolute inset-y-0 left-0 flex items-center">
               <Button
                 variant="outline"
@@ -66,6 +109,8 @@ export default function VideoDialog({
                 <ChevronLeft className="h-8 w-8" />
               </Button>
             </div>
+
+            {/* Next button */}
             <div className="absolute inset-y-0 right-0 flex items-center">
               <Button
                 variant="outline"
@@ -76,6 +121,25 @@ export default function VideoDialog({
               >
                 <ChevronRight className="h-8 w-8" />
               </Button>
+            </div>
+
+            {/* Close button */}
+            <div className="absolute top-4 right-4">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 bg-background/70 hover:bg-background/90 pointer-events-auto"
+                onClick={onClose}
+              >
+                <X className="h-6 w-6" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Episode info overlay */}
+          <div className="absolute bottom-4 left-4 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="bg-background/70 px-3 py-2 rounded-lg">
+              <p className="text-sm font-medium">{episode?.name}</p>
             </div>
           </div>
         </div>

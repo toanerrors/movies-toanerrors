@@ -5,31 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import { Badge } from "./ui/badge";
-import { useState, useRef } from "react";
-import {
-  getWatchHistory,
-  getEpisodeProgress,
-  saveWatchHistory,
-} from "@/lib/watch-history";
-import { Check, ChevronLeft, ChevronRight } from "lucide-react";
-import VideoPlayer from "./VideoPlayer";
-import M3U8Player from "./M3U8Player";
-import VideoDialog from "@/components/VideoDialog";
+import { useState } from "react";
+import { getLatestWatchForMovie, getMovieProgress } from "@/lib/watch-history";
+import { Check, Clock, Play } from "lucide-react";
+import EnhancedVideoDialog from "@/components/EnhancedVideoDialog";
+import AutoPlayNotification from "@/components/AutoPlayNotification";
+import { useVideoNavigation } from "@/hooks/useVideoNavigation";
 
 function formatLastWatched(time: number) {
   return new Date(time).toLocaleString();
-}
-
-function getLatestWatchForMovie(movieSlug: string) {
-  const all = getWatchHistory().filter((item) => item.movieSlug === movieSlug);
-  if (!all.length) return null;
-  // Return the one with the most recent lastWatched
-  return all.reduce((prev, cur) =>
-    cur.lastWatched > prev.lastWatched ? cur : prev
-  );
 }
 
 function formatMinutes(seconds: number) {
@@ -45,108 +31,57 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
   const [selectedEpisode, setSelectedEpisode] = useState<
     ServerEpisode["server_data"][0] | null
   >(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout>(null);
-  const [videoEnded, setVideoEnded] = useState(false);
 
-  // --- New: VideoDialog state and navigation helpers ---
-  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
-  const [currentEpisode, setCurrentEpisode] = useState<
-    ServerEpisode["server_data"][0] | null
-  >(null);
+  // Use the video navigation hook
+  const {
+    isDialogOpen,
+    currentEpisode,
+    currentServerName,
+    isAutoPlaying,
+    autoPlayCountdown,
+    openEpisode,
+    closeDialog,
+    goToPrevious,
+    goToNext,
+    cancelAutoPlay,
+    playNextNow,
+    handleTimeUpdate,
+    handleEpisodeEnd,
+    hasPrevious,
+    hasNext,
+    getEpisodeStatus,
+    getNextEpisodeName,
+    getInitialTime,
+    getCurrentEpisodeIndex,
+    getTotalEpisodes,
+  } = useVideoNavigation({
+    episodes,
+    movieSlug,
+    autoPlayNext: true,
+    autoPlayDelay: 3,
+  });
 
-  // Find current server and index for navigation
-  const getCurrentServerAndIndex = () => {
-    if (!currentEpisode) return { server: null, index: -1 };
-    const server = episodes.find((s) =>
-      s.server_data.some((ep) => ep.slug === currentEpisode.slug)
-    );
-    if (!server) return { server: null, index: -1 };
-    const index = server.server_data.findIndex(
-      (ep) => ep.slug === currentEpisode.slug
-    );
-    return { server, index };
-  };
-
-  const handleOpenEpisode = (ep: ServerEpisode["server_data"][0]) => {
-    setCurrentEpisode(ep);
-    setVideoDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setVideoDialogOpen(false);
-    setCurrentEpisode(null);
-  };
-
-  const handlePrev = () => {
-    const { server, index } = getCurrentServerAndIndex();
-    if (server && index > 0) {
-      setCurrentEpisode(server.server_data[index - 1]);
-    }
-  };
-  const handleNext = () => {
-    const { server, index } = getCurrentServerAndIndex();
-    if (server && index < server.server_data.length - 1) {
-      setCurrentEpisode(server.server_data[index + 1]);
-    }
-  };
-  const hasPrev = () => {
-    const { index } = getCurrentServerAndIndex();
-    return index > 0;
-  };
-  const hasNext = () => {
-    const { server, index } = getCurrentServerAndIndex();
-    return server ? index < server.server_data.length - 1 : false;
-  };
-
-  // --- Optimize: Save watch history only if timestamp changed ---
-  const lastSavedTimestamp = useRef<number | undefined>(undefined);
-  const handleTimeUpdate = (time: number) => {
-    if (currentEpisode && lastSavedTimestamp.current !== time) {
-      saveWatchHistory({
-        movieSlug,
-        episodeSlug: currentEpisode.slug,
-        timestamp: time,
-        lastWatched: Date.now(),
-        serverName:
-          episodes.find((s) =>
-            s.server_data.some((ep) => ep.slug === currentEpisode.slug)
-          )?.server_name || "",
-      });
-      lastSavedTimestamp.current = time;
-    }
-  };
-
-  const progress = selectedEpisode
-    ? getEpisodeProgress(movieSlug, selectedEpisode.slug)
-    : undefined;
-
-  const getWatchStatus = (episode: ServerEpisode["server_data"][0]) => {
-    const progress = getEpisodeProgress(movieSlug, episode.slug);
-    return progress ? true : false;
-  };
-
-  const getEpisodeStatus = (episode: ServerEpisode["server_data"][0]) => {
-    const isWatched = getWatchStatus(episode);
-    const isCurrentlyWatching = selectedEpisode?.slug === episode.slug;
-    return { isWatched, isCurrentlyWatching };
-  };
-
-  // Find the most recent watch data and matching episode
-  const lastWatched = getLatestWatchForMovie(movieSlug) || {
-    episodeSlug: null,
-    timestamp: 0,
-  };
+  // Get enhanced movie progress information
+  const movieProgress = getMovieProgress(movieSlug);
+  const lastWatched = getLatestWatchForMovie(movieSlug);
   const lastWatchedServer = lastWatched
     ? episodes.find((server) =>
         server.server_data.some((ep) => ep.slug === lastWatched.episodeSlug)
       )
     : null;
-  const lastWatchedEpisode = lastWatchedServer
-    ? lastWatchedServer.server_data.find(
-        (ep) => ep.slug === lastWatched.episodeSlug
-      )
-    : null;
+  const lastWatchedEpisode =
+    lastWatchedServer && lastWatched
+      ? lastWatchedServer.server_data.find(
+          (ep) => ep.slug === lastWatched.episodeSlug
+        )
+      : null;
+
+  // Handle continue watching
+  const handleContinueWatching = () => {
+    if (lastWatchedEpisode) {
+      openEpisode(lastWatchedEpisode);
+    }
+  };
 
   return (
     <>
@@ -165,7 +100,7 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
         </CardHeader>
         <CardContent className="p-2">
           {/* Display a small banner for the latest watch */}
-          {lastWatchedEpisode && (
+          {lastWatchedEpisode && lastWatched && (
             <div className="mb-2 p-2 border border-primary/50 rounded-md text-sm">
               <div>
                 Bạn đã xem tới:{" "}
@@ -176,7 +111,7 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                 variant="secondary"
                 size="sm"
                 className="mt-1"
-                onClick={() => setSelectedEpisode(lastWatchedEpisode)}
+                onClick={handleContinueWatching}
               >
                 Xem tiếp
               </Button>
@@ -205,6 +140,7 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
               >
                 <div className="flex flex-wrap gap-2">
                   {server.server_data.map((episode, index) => {
+                    const status = getEpisodeStatus(episode);
                     return (
                       <motion.div
                         key={episode.slug}
@@ -215,19 +151,21 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                         <Button
                           variant="secondary"
                           className={`w-fit min-w-20 h-7 text-[10px] px-1 relative group ${
-                            getEpisodeStatus(episode).isWatched
+                            status.isCompleted
+                              ? "ring-1 ring-green-500/50 bg-green-500/10"
+                              : status.hasProgress
                               ? "ring-1 ring-primary/50 bg-primary/10"
                               : ""
                           } ${
-                            getEpisodeStatus(episode).isCurrentlyWatching
+                            status.isCurrentlyPlaying
                               ? "ring-2 ring-destructive bg-destructive/20 font-bold"
                               : ""
                           }`}
-                          onClick={() => handleOpenEpisode(episode)}
+                          onClick={() => openEpisode(episode)}
                         >
                           <span>{episode.name}</span>
-                          {getEpisodeStatus(episode).isWatched && (
-                            <Check className="w-3 h-3 absolute right-1 top-1 text-primary/70" />
+                          {status.isCompleted && (
+                            <Check className="w-3 h-3 absolute right-1 top-1 text-green-500/70" />
                           )}
                         </Button>
                       </motion.div>
@@ -239,22 +177,31 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
           </Tabs>
         </CardContent>
       </Card>
-      {/* --- VideoDialog extracted --- */}
-      <VideoDialog
-        open={videoDialogOpen}
+
+      {/* Enhanced VideoDialog - auto-play is handled externally via AutoPlayNotification */}
+      <EnhancedVideoDialog
+        open={isDialogOpen}
         episode={currentEpisode}
-        onClose={handleCloseDialog}
+        serverName={currentServerName || undefined}
+        onClose={closeDialog}
         onTimeUpdate={handleTimeUpdate}
-        onEnded={handleNext}
-        initialTime={
-          currentEpisode
-            ? getEpisodeProgress(movieSlug, currentEpisode.slug)?.timestamp
-            : 0
-        }
-        onPrev={handlePrev}
-        onNext={handleNext}
-        hasPrev={hasPrev()}
-        hasNext={hasNext()}
+        onEnded={handleEpisodeEnd}
+        initialTime={getInitialTime()}
+        onPrev={goToPrevious}
+        onNext={goToNext}
+        hasPrev={hasPrevious}
+        hasNext={hasNext}
+        currentEpisodeIndex={getCurrentEpisodeIndex()}
+        totalEpisodes={getTotalEpisodes()}
+      />
+
+      {/* External Auto-play notification - appears outside dialog */}
+      <AutoPlayNotification
+        isVisible={isAutoPlaying && autoPlayCountdown > 0 && isDialogOpen}
+        countdown={autoPlayCountdown}
+        nextEpisodeName={getNextEpisodeName()}
+        onCancel={cancelAutoPlay}
+        onPlayNow={playNextNow}
       />
     </>
   );
