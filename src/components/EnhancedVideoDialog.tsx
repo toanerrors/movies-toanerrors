@@ -45,6 +45,14 @@ interface VideoControlsProps {
   totalEpisodes?: number;
 }
 
+function isTouchDevice() {
+  if (typeof window === "undefined") return false;
+  return (
+    "ontouchstart" in window ||
+    (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)
+  );
+}
+
 function VideoControls({
   onPrev,
   onNext,
@@ -58,10 +66,31 @@ function VideoControls({
 }: VideoControlsProps) {
   const [showControls, setShowControls] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [alwaysShow, setAlwaysShow] = useState(false);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
+    // Always show controls on touch devices or small screens
+    if (typeof window !== "undefined") {
+      const check = () => {
+        if (isTouchDevice() || window.innerWidth <= 768) {
+          setAlwaysShow(true);
+          setShowControls(true);
+        } else {
+          setAlwaysShow(false);
+        }
+      };
+      check();
+      window.addEventListener("resize", check);
+      return () => window.removeEventListener("resize", check);
+    }
+  }, []);
 
+  useEffect(() => {
+    if (alwaysShow) {
+      setShowControls(true);
+      return;
+    }
+    let timeout: NodeJS.Timeout;
     if (!isHovering) {
       timeout = setTimeout(() => {
         setShowControls(false);
@@ -69,25 +98,28 @@ function VideoControls({
     } else {
       setShowControls(true);
     }
-
     return () => {
       if (timeout) clearTimeout(timeout);
     };
-  }, [isHovering]);
+  }, [isHovering, alwaysShow]);
 
   return (
     <div
       className="absolute inset-0 z-30 pointer-events-none"
       onMouseEnter={() => {
-        setIsHovering(true);
-        setShowControls(true);
+        if (!alwaysShow) {
+          setIsHovering(true);
+          setShowControls(true);
+        }
       }}
       onMouseLeave={() => {
-        setIsHovering(false);
+        if (!alwaysShow) setIsHovering(false);
       }}
       onMouseMove={() => {
-        setIsHovering(true);
-        setShowControls(true);
+        if (!alwaysShow) {
+          setIsHovering(true);
+          setShowControls(true);
+        }
       }}
     >
       {/* Top gradient overlay */}
@@ -95,6 +127,7 @@ function VideoControls({
         className={`absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-300 ${
           showControls ? "opacity-100" : "opacity-0"
         }`}
+        style={alwaysShow ? { opacity: 1 } : {}}
       >
         {/* Close button */}
         <div className="absolute top-3 right-3 pointer-events-auto">
@@ -141,6 +174,7 @@ function VideoControls({
         className={`absolute inset-y-0 left-0 right-0 flex items-center justify-between transition-opacity duration-300 ${
           showControls ? "opacity-100" : "opacity-0"
         }`}
+        style={alwaysShow ? { opacity: 1 } : {}}
       >
         {/* Previous button */}
         {hasPrev && (
