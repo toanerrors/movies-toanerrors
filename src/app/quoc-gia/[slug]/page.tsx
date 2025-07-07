@@ -8,7 +8,7 @@ import React, { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 
-const CDN = "https://img.ophim1.com/uploads/movies/";
+const CDN = "https://img.ophim.live";
 
 function CountryContent() {
   const params = useParams();

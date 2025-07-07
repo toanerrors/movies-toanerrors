@@ -86,15 +86,11 @@ function HomeContent() {
           ))}
         </div>
         <div className="mt-12 flex justify-center animate-in fade-in slide-in-from-bottom duration-700 delay-300">
-          <Card className="bg-background/60 backdrop-blur-sm border-border/50">
-            <CardContent className="p-6">
-              <Pagination
-                currentPage={currentPage}
-                totalItems={totalItems}
-                itemsPerPage={totalItemsPerPage}
-              />
-            </CardContent>
-          </Card>
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            itemsPerPage={totalItemsPerPage}
+          />
         </div>
       </section>
     </main>

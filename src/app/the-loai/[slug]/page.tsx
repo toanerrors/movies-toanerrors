@@ -8,7 +8,7 @@ import React, { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 
-const CDN = "https://img.ophim1.com/uploads/movies/";
+const CDN = "https://img.ophim.live";
 
 function CategoryContent() {
   const params = useParams();
@@ -59,9 +59,7 @@ function CategoryContent() {
           <div className="text-2xl font-bold text-muted-foreground">
             Không thể tải dữ liệu thể loại
           </div>
-          <p className="text-muted-foreground">
-            Vui lòng thử lại sau
-          </p>
+          <p className="text-muted-foreground">Vui lòng thử lại sau</p>
         </div>
       </main>
     );
@@ -112,11 +110,13 @@ function CategoryContent() {
 
 export default function Category() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </main>
+      }
+    >
       <CategoryContent />
     </Suspense>
   );
