@@ -38,8 +38,14 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
       setIsLoading(true);
       try {
         const data = await searchMovies(query);
-        setResults(data?.data?.items || []);
+        if (!data || !data.data || !Array.isArray(data.data.items)) {
+          setResults([]);
+          throw new Error("Không nhận được dữ liệu từ API tìm kiếm");
+        }
+        setResults(data.data.items);
       } catch (error) {
+        setResults([]);
+        alert(error instanceof Error ? error.message : "Lỗi tìm kiếm phim");
         console.error("Search error:", error);
       } finally {
         setIsLoading(false);

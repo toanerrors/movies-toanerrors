@@ -267,16 +267,38 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
     }
   };
 
-  // Listen for fullscreen changes
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
+  // Detect iOS
+  const isIOS =
+    typeof window !== "undefined" &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // Track fullscreen state for iOS
+  const [isIOSFullscreen, setIsIOSFullscreen] = useState(false);
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () =>
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
+  // Listen for iOS fullscreen (webkitfullscreenchange)
+  useEffect(() => {
+    if (!isIOS) return;
+    const video = videoRef.current;
+    if (!video) return;
+    function handleWebkitFullscreenChange() {
+      // iOS Safari: video.webkitDisplayingFullscreen
+      setIsIOSFullscreen((video as any).webkitDisplayingFullscreen === true);
+    }
+    video.addEventListener(
+      "webkitbeginfullscreen",
+      handleWebkitFullscreenChange
+    );
+    video.addEventListener("webkitendfullscreen", handleWebkitFullscreenChange);
+    return () => {
+      video.removeEventListener(
+        "webkitbeginfullscreen",
+        handleWebkitFullscreenChange
+      );
+      video.removeEventListener(
+        "webkitendfullscreen",
+        handleWebkitFullscreenChange
+      );
+    };
+  }, [isIOS]);
 
   const handleContainerClick = () => {
     if (controlTimeout) clearTimeout(controlTimeout);
@@ -326,181 +348,172 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
             e.stopPropagation();
             togglePlayPause();
           }}
+          controls={isIOS && isIOSFullscreen}
         />
         {/* Redesigned Controls Overlay */}
-        <div className={`absolute inset-0 z-20 pointer-events-none`}>
-          {/* Top bar: Close, Info */}
-          <div
-            className={`absolute z-30 top-0 left-0 right-0 flex items-center justify-between px-6 h-16 bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${
-              showControls ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ pointerEvents: "auto" }}
-          >
-            {/* Info */}
-            <div className="flex flex-col gap-1 max-w-xs">
-              <span className="text-white font-semibold text-base truncate">
-                {episodeName}
-              </span>
-              <div className="flex items-center gap-2">
-                {serverName && (
-                  <span className="text-xs bg-white/20 text-white rounded px-2 py-0.5">
-                    {serverName}
-                  </span>
-                )}
-                {currentIndex !== undefined && totalEpisodes !== undefined && (
-                  <span className="text-xs bg-white/20 text-white rounded px-2 py-0.5">
-                    {currentIndex + 1}/{totalEpisodes}
-                  </span>
-                )}
+        {!isIOSFullscreen && (
+          <div className="absolute inset-0 z-20 pointer-events-none select-none">
+            {/* Top bar: Close, Info */}
+            <div
+              className={`absolute z-30 top-0 left-0 right-0 flex items-center justify-between px-2 sm:px-4 h-10 sm:h-12 bg-gradient-to-b from-black/90 to-transparent transition-opacity duration-300 ${
+                showControls ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ pointerEvents: "auto" }}
+            >
+              {/* Info - mobile chỉ hiển thị 1 dòng, desktop giữ nguyên */}
+              <div className="flex flex-col sm:flex-col gap-0.5 max-w-[65vw] sm:max-w-xs">
+                <span className="text-white font-semibold text-xs sm:text-sm truncate">
+                  {episodeName}
+                  {serverName && (
+                    <span className="ml-1 text-[10px] bg-white/20 text-white rounded px-1 py-0.5 align-middle hidden sm:inline">
+                      {serverName}
+                    </span>
+                  )}
+                  {currentIndex !== undefined &&
+                    totalEpisodes !== undefined && (
+                      <span className="ml-1 text-[10px] bg-white/20 text-white rounded px-1 py-0.5 align-middle hidden sm:inline">
+                        {currentIndex + 1}/{totalEpisodes}
+                      </span>
+                    )}
+                </span>
+                {/* Mobile: chỉ hiện server/tập dưới dạng tooltip khi bấm vào tên tập */}
+              </div>
+              {/* Desktop: icon */}
+              {/* Close button - icon XCircle trắng, không nền, không màu, không hiệu ứng hover/focus */}
+              {onClose && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Đóng"
+                  className="h-8 w-8 flex items-center justify-center rounded-full bg-transparent border-none p-0 m-0 focus:outline-none focus:ring-0 shadow-none hover:bg-transparent active:bg-transparent transition-none"
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                ></button>
+              )}
+            </div>
+            {/* Side navigation - Prev/Next */}
+            <div
+              className={`absolute inset-y-0 left-0 right-0 flex items-center justify-between transition-opacity duration-300 ${
+                showControls ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ pointerEvents: "auto" }}
+            >
+              {/* Previous button */}
+              <div className="w-10 sm:w-14 flex items-center justify-start pl-0.5 sm:pl-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 sm:h-10 sm:w-10 bg-white/10 hover:bg-white/30 text-white border border-white/20 shadow backdrop-blur-lg"
+                      onClick={onPrev}
+                      aria-label="Tập trước"
+                      disabled={!hasPrev || !onPrev}
+                    >
+                      <ChevronLeftCircle className="h-5 w-5 sm:h-7 sm:w-7" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {hasPrev ? "Tập trước" : "Không có tập trước"}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="flex-1" />
+              {/* Next button */}
+              <div className="w-10 sm:w-14 flex items-center justify-end pr-0.5 sm:pr-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 sm:h-10 sm:w-10 bg-white/10 hover:bg-white/30 text-white border border-white/20 shadow backdrop-blur-lg"
+                      onClick={onNext}
+                      aria-label="Tập tiếp theo"
+                      disabled={!hasNext || !onNext}
+                    >
+                      <ChevronRightCircle className="h-5 w-5 sm:h-7 sm:w-7" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {hasNext ? "Tập tiếp theo" : "Không có tập tiếp theo"}
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
-            {/* Close button */}
-            {onClose && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 bg-black/50 hover:bg-black/70 text-white border-none backdrop-blur-md shadow-lg"
-                onClick={onClose}
-              >
-                <XCircle className="h-7 w-7" />
-              </Button>
-            )}
-          </div>
-          {/* Side navigation */}
-          <div
-            className={`absolute inset-y-0 left-0 right-0 flex items-center justify-between transition-opacity duration-300 ${
-              showControls ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ pointerEvents: "auto" }}
-          >
-            {/* Previous button */}
-            {hasPrev && onPrev && (
-              <div className="w-24 flex items-center justify-start pl-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-14 w-14 bg-black/50 hover:bg-black/70 text-white border-none shadow-xl backdrop-blur-md"
-                  onClick={onPrev}
-                >
-                  <ChevronLeftCircle className="h-10 w-10" />
-                </Button>
-              </div>
-            )}
-            <div className="flex-1" />
-            {/* Next button */}
-            {hasNext && onNext && (
-              <div className="w-24 flex items-center justify-end pr-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-14 w-14 bg-black/50 hover:bg-black/70 text-white border-none shadow-xl backdrop-blur-md"
-                  onClick={onNext}
-                >
-                  <ChevronRightCircle className="h-10 w-10" />
-                </Button>
-              </div>
-            )}
-          </div>
-          {/* Bottom controls */}
-          <div
-            className={`absolute bottom-0 left-0 right-0 px-6 pb-4 flex flex-col gap-2 transition-opacity duration-300 ${
-              showControls ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ pointerEvents: "auto" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Progress Bar */}
-            <div className="flex items-center gap-3">
-              <span className="text-white text-xs min-w-[44px] text-right">
-                {formatTime(currentTime)}
-              </span>
-              <div className="flex-1 relative">
-                <Progress
-                  value={duration ? (currentTime / duration) * 100 : 0}
-                  max={100}
-                  className="h-2 bg-white/30 rounded-full"
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={duration ? (currentTime / duration) * 100 : 0}
-                  onChange={(e) => handleSeek([parseFloat(e.target.value)])}
-                  className="absolute left-0 top-0 w-full h-4 opacity-0 cursor-pointer z-10"
-                  style={{ pointerEvents: "auto" }}
-                />
-              </div>
-              <span className="text-white text-xs min-w-[44px] text-left">
-                {formatTime(duration)}
-              </span>
-            </div>
-            {/* Main Controls Row */}
-            <div className="flex items-center justify-between gap-4 mt-1">
-              <div className="flex items-center gap-2">
-                {/* Play/Pause Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-14 w-14 text-white hover:bg-white/20"
-                  onClick={togglePlayPause}
-                >
-                  {isPlaying ? (
-                    <PauseCircle className="h-10 w-10" />
-                  ) : (
-                    <PlayCircle className="h-10 w-10" />
-                  )}
-                </Button>
-                {/* Volume Controls */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 text-white hover:bg-white/20"
-                  onClick={toggleMute}
-                >
-                  {isMuted || volume === 0 ? (
-                    <VolumeX className="h-7 w-7" />
-                  ) : (
-                    <Volume2 className="h-7 w-7" />
-                  )}
-                </Button>
-                <div className="w-24 hidden sm:block relative">
+            {/* Bottom controls - Glassmorphic Redesign */}
+            <div
+              className={`absolute bottom-0 left-0 right-0 px-0.5 sm:px-2 pb-1 sm:pb-2 flex flex-col gap-0.5 sm:gap-1.5 transition-opacity duration-300 ${
+                showControls ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ pointerEvents: "auto" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Progress Bar */}
+              <div className="flex items-center gap-0.5 sm:gap-2">
+                <span className="text-white text-[10px] min-w-[24px] sm:text-xs sm:min-w-[36px] text-right">
+                  {formatTime(currentTime)}
+                </span>
+                <div className="flex-1 relative">
                   <Progress
-                    value={isMuted ? 0 : volume * 100}
+                    value={duration ? (currentTime / duration) * 100 : 0}
                     max={100}
-                    className="h-2 bg-white/30 rounded-full"
-                    style={{ minWidth: 60 }}
+                    className="h-1 sm:h-1.5 bg-white/30 rounded-full"
                   />
                   <input
                     type="range"
                     min="0"
                     max="100"
-                    value={isMuted ? 0 : volume * 100}
-                    onChange={(e) =>
-                      handleVolumeChange([parseFloat(e.target.value)])
-                    }
-                    className="absolute left-0 top-0 w-full h-2 opacity-0 cursor-pointer"
-                    style={{ minWidth: 60 }}
+                    value={duration ? (currentTime / duration) * 100 : 0}
+                    onChange={(e) => handleSeek([parseFloat(e.target.value)])}
+                    className="absolute left-0 top-0 w-full h-3 opacity-0 cursor-pointer z-10"
+                    style={{ pointerEvents: "auto" }}
                   />
                 </div>
+                <span className="text-white text-[10px] min-w-[24px] sm:text-xs sm:min-w-[36px] text-left">
+                  {formatTime(duration)}
+                </span>
               </div>
-              <div className="flex items-center gap-2">
-                {/* Fullscreen Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 text-white hover:bg-white/20"
-                  onClick={toggleFullscreen}
+              {/* Main Controls Row - mobile: chỉ giữ play/pause và fullscreen, căn giữa, spacing đều */}
+              <div className="w-full flex items-center justify-center mt-1 sm:mt-1.5">
+                <div
+                  className="flex items-center justify-center gap-2 sm:gap-2.5 bg-white/10 backdrop-blur-lg rounded-2xl shadow border border-white/20 px-2 py-1 sm:px-3 sm:py-1.5 pointer-events-auto mx-auto"
+                  style={{
+                    boxShadow:
+                      "0 2px 12px 0 rgba(0,0,0,0.14), 0 1px 4px 0 rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.14)",
+                  }}
                 >
-                  {isFullscreen ? (
-                    <Minimize2 className="h-7 w-7" />
-                  ) : (
-                    <Maximize2 className="h-7 w-7" />
-                  )}
-                </Button>
+                  {/* Play/Pause Button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 sm:h-10 sm:w-10 text-white hover:bg-white/20 rounded-full focus:ring-2 focus:ring-white/40"
+                    onClick={togglePlayPause}
+                  >
+                    {isPlaying ? (
+                      <PauseCircle className="h-6 w-6 sm:h-7 sm:w-7" />
+                    ) : (
+                      <PlayCircle className="h-6 w-6 sm:h-7 sm:w-7" />
+                    )}
+                  </Button>
+                  {/* Fullscreen Button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 sm:h-10 sm:w-10 text-white hover:bg-white/20 rounded-full focus:ring-2 focus:ring-white/40"
+                    onClick={toggleFullscreen}
+                  >
+                    {isFullscreen ? (
+                      <Minimize2 className="h-6 w-6" />
+                    ) : (
+                      <Maximize2 className="h-6 w-6" />
+                    )}
+                  </Button>
+                </div>
               </div>
+              {/* Mobile Volume Slider: đã ẩn hoàn toàn trên mobile */}
             </div>
           </div>
-        </div>
+        )}
         {/* Center Play Button */}
         {!isPlaying && !isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">

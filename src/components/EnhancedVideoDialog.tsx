@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import M3U8Player from "@/components/M3U8Player";
 import VideoPlayer from "@/components/VideoPlayer";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { type ServerEpisode } from "@/types/common";
 import { useState, useEffect } from "react";
 
@@ -14,12 +13,12 @@ interface EnhancedVideoDialogProps {
   onTimeUpdate?: (time: number, duration?: number) => void;
   onEnded?: () => void;
   initialTime?: number;
+  isAutoPlaying?: boolean;
+  onCancelAutoPlay?: () => void;
   onPrev?: () => void;
   onNext?: () => void;
   hasPrev?: boolean;
   hasNext?: boolean;
-  isAutoPlaying?: boolean;
-  onCancelAutoPlay?: () => void;
 }
 
 export default function EnhancedVideoDialog({
@@ -29,18 +28,18 @@ export default function EnhancedVideoDialog({
   onTimeUpdate,
   onEnded,
   initialTime,
-  onPrev,
-  onNext,
-  hasPrev,
-  hasNext,
   isAutoPlaying = false,
   onCancelAutoPlay,
+  onPrev,
+  onNext,
+  hasPrev = false,
+  hasNext = false,
 }: EnhancedVideoDialogProps) {
   const [countdown, setCountdown] = useState(0);
 
   // Auto-play countdown
   useEffect(() => {
-    if (isAutoPlaying && hasNext) {
+    if (isAutoPlaying) {
       setCountdown(3);
       const interval = setInterval(() => {
         setCountdown((prev) => {
@@ -55,10 +54,10 @@ export default function EnhancedVideoDialog({
     } else {
       setCountdown(0);
     }
-  }, [isAutoPlaying, hasNext]);
+  }, [isAutoPlaying]);
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open}>
       <DialogTitle className="sr-only">
         {episode ? `Playing: ${episode.name}` : "Video Player"}
       </DialogTitle>
@@ -71,6 +70,11 @@ export default function EnhancedVideoDialog({
                 onTimeUpdate={onTimeUpdate}
                 onEnded={onEnded}
                 initialTime={initialTime}
+                hasPrev={hasPrev}
+                hasNext={hasNext}
+                onPrev={onPrev}
+                onNext={onNext}
+                onClose={onClose}
               />
             ) : (
               <VideoPlayer
@@ -101,53 +105,6 @@ export default function EnhancedVideoDialog({
               </div>
             </div>
           )}
-
-          {/* Navigation overlay */}
-          <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between">
-            {/* Top bar: Close button */}
-            <div className="flex justify-end p-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="bg-background/80 hover:bg-background/90 pointer-events-auto shadow-md border border-border"
-                onClick={onClose}
-                aria-label="Đóng"
-              >
-                <X className="h-6 w-6" />
-              </Button>
-            </div>
-            {/* Middle: Prev/Next */}
-            <div className="flex flex-1 items-center justify-between px-4">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-12 w-12 bg-background/80 hover:bg-background/90 pointer-events-auto border border-border shadow-md"
-                onClick={onPrev}
-                disabled={!hasPrev}
-                aria-label="Tập trước"
-              >
-                <ChevronLeft className="h-8 w-8" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-12 w-12 bg-background/80 hover:bg-background/90 pointer-events-auto border border-border shadow-md"
-                onClick={onNext}
-                disabled={!hasNext}
-                aria-label="Tập tiếp theo"
-              >
-                <ChevronRight className="h-8 w-8" />
-              </Button>
-            </div>
-            {/* Bottom: Episode info */}
-            <div className="flex justify-start p-4">
-              <div className="bg-background/80 px-4 py-2 rounded-lg shadow-md pointer-events-none">
-                <p className="text-base font-medium text-foreground line-clamp-1">
-                  {episode?.name}
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </DialogContent>
     </Dialog>

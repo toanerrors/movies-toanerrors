@@ -306,7 +306,6 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
       <EnhancedVideoDialog
         open={isDialogOpen}
         episode={currentEpisode}
-        serverName={currentServerName || undefined}
         onClose={closeDialog}
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleEpisodeEnd}
@@ -315,8 +314,8 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
         onNext={goToNext}
         hasPrev={hasPrevious}
         hasNext={hasNext}
-        currentEpisodeIndex={getCurrentEpisodeIndex()}
-        totalEpisodes={getTotalEpisodes()}
+        isAutoPlaying={isAutoPlaying}
+        onCancelAutoPlay={cancelAutoPlay}
       />
 
       {/* Auto-play notification */}

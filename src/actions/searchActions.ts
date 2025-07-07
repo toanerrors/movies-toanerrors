@@ -1,9 +1,23 @@
 import axiosClient from "@/lib/axiosClient";
-import { Movie, PaginatedResponse } from "@/types/common";
+import { Movie } from "@/types/common";
 
-export const searchMovies = async (keyword: string, page: number = 1) => {
+export interface OphimSearchResponse {
+  status: string;
+  message: string;
+  data: {
+    seoOnPage?: any;
+    breadCrumb?: any;
+    titlePage?: string;
+    items: Movie[];
+  };
+}
+
+export const searchMovies = async (
+  keyword: string,
+  page: number = 1
+): Promise<OphimSearchResponse | null> => {
   try {
-    const response = await axiosClient.get<PaginatedResponse<Movie>>(
+    const response = await axiosClient.get<OphimSearchResponse>(
       "/v1/api/tim-kiem",
       {
         params: { keyword, page },
