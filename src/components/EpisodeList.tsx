@@ -5,14 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { motion } from "framer-motion";
 import { Badge } from "./ui/badge";
 import { useState } from "react";
 import { getLatestWatchForMovie, getMovieProgress } from "@/lib/watch-history";
-import { 
-  Check, 
-  Clock, 
-  Play, 
+import {
+  Check,
+  Clock,
+  Play,
   PlayCircle,
   Monitor,
   Smartphone,
@@ -20,7 +19,7 @@ import {
   Eye,
   ChevronRight,
   Download,
-  History
+  History,
 } from "lucide-react";
 import EnhancedVideoDialog from "@/components/EnhancedVideoDialog";
 import AutoPlayNotification from "@/components/AutoPlayNotification";
@@ -102,11 +101,7 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
+      <div className="animate-in fade-in slide-in-from-bottom duration-500 delay-200">
         <Card className="border-none bg-gradient-to-br from-background/95 via-background/90 to-background/95 backdrop-blur-xl shadow-lg">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
@@ -115,7 +110,10 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                 Danh sách tập phim
               </CardTitle>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                <Badge
+                  variant="secondary"
+                  className="bg-primary/10 text-primary border-primary/20"
+                >
                   {totalEpisodes} tập
                 </Badge>
               </div>
@@ -125,12 +123,7 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
           <CardContent className="space-y-6">
             {/* Continue watching banner */}
             {lastWatchedEpisode && lastWatched && (
-              <motion.div 
-                className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-xl p-4"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-              >
+              <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-xl p-4 animate-in fade-in zoom-in duration-300">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0 w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
@@ -153,7 +146,7 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                     Xem tiếp
                   </Button>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* Server tabs */}
@@ -169,8 +162,8 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                       >
                         <Monitor className="w-4 h-4 mr-2" />
                         {server.server_name}
-                        <Badge 
-                          variant="secondary" 
+                        <Badge
+                          variant="secondary"
                           className="ml-2 text-xs bg-primary/20 text-primary"
                         >
                           {server.server_data.length}
@@ -192,32 +185,30 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                     {server.server_data.map((episode, index) => {
                       const status = getEpisodeStatus(episode);
-                      
+
                       return (
-                        <motion.div
+                        <div
                           key={episode.slug}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ 
-                            delay: Math.min(index * 0.02, 0.5),
-                            duration: 0.3
+                          className="animate-in fade-in slide-in-from-bottom duration-300 hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                          style={{
+                            animationDelay: `${Math.min(index * 20, 500)}ms`,
                           }}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
                         >
                           <Button
                             variant="outline"
                             className={`
                               relative w-full h-14 p-3 rounded-xl border-2 transition-all duration-300 overflow-hidden
-                              ${status.isCompleted
-                                ? "border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-400"
-                                : status.hasProgress
-                                ? "border-primary/50 bg-primary/10 text-primary"
-                                : "border-border/50 hover:border-primary/50 hover:bg-primary/5"
+                              ${
+                                status.isCompleted
+                                  ? "border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-400"
+                                  : status.hasProgress
+                                  ? "border-primary/50 bg-primary/10 text-primary"
+                                  : "border-border/50 hover:border-primary/50 hover:bg-primary/5"
                               }
-                              ${status.isCurrentlyPlaying
-                                ? "border-red-500 bg-red-500/20 text-red-700 dark:text-red-400 shadow-lg"
-                                : ""
+                              ${
+                                status.isCurrentlyPlaying
+                                  ? "border-red-500 bg-red-500/20 text-red-700 dark:text-red-400 shadow-lg"
+                                  : ""
                               }
                               group
                             `}
@@ -227,13 +218,13 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
                             </div>
-                            
+
                             {/* Content */}
                             <div className="relative z-10 flex flex-col items-center justify-center gap-1 w-full">
                               <span className="font-semibold text-sm line-clamp-1">
                                 {episode.name}
                               </span>
-                              
+
                               {/* Status indicators */}
                               <div className="flex items-center gap-1">
                                 {status.isCompleted && (
@@ -252,9 +243,11 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                             {status.hasProgress && !status.isCompleted && (
                               <div className="absolute bottom-0 left-0 right-0">
                                 <div className="h-1 bg-primary/20 rounded-b-xl">
-                                  <div 
+                                  <div
                                     className="h-full bg-primary rounded-b-xl transition-all duration-300"
-                                    style={{ width: `${status.progressPercentage}%` }}
+                                    style={{
+                                      width: `${status.progressPercentage}%`,
+                                    }}
                                   />
                                 </div>
                               </div>
@@ -267,7 +260,7 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                               </div>
                             </div>
                           </Button>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
@@ -275,8 +268,13 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
                   {/* Server info */}
                   <div className="mt-4 text-center">
                     <p className="text-sm text-muted-foreground">
-                      Server: <span className="font-medium">{server.server_name}</span> • 
-                      {" "}<span className="font-medium">{server.server_data.length}</span> tập
+                      Server:{" "}
+                      <span className="font-medium">{server.server_name}</span>{" "}
+                      •{" "}
+                      <span className="font-medium">
+                        {server.server_data.length}
+                      </span>{" "}
+                      tập
                     </p>
                   </div>
                 </TabsContent>
@@ -302,7 +300,7 @@ export default function EpisodeList({ episodes, movieSlug }: EpisodeListProps) {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Enhanced VideoDialog */}
       <EnhancedVideoDialog

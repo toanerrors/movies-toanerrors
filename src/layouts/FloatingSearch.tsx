@@ -1,16 +1,48 @@
 "use client";
-import React, { useState } from "react";
-import { Search, X, TrendingUp, Sparkles } from "lucide-react";
+
+import React, { useState, useEffect, useCallback } from "react";
+import { Search, TrendingUp, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ModeToggle } from "./mode-toggle";
+import { useSearchMovies } from "@/hooks/useSearch";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const FloatingSearch: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const router = useRouter();
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: searchResults = [], isLoading } = useSearchMovies(
+    debouncedQuery,
+    debouncedQuery.length > 2
+  );
 
   const trendingSearches = [
     "One Piece",
@@ -18,55 +50,55 @@ const FloatingSearch: React.FC = () => {
     "Attack on Titan",
     "Demon Slayer",
     "Dragon Ball",
+    "Jujutsu Kaisen",
+    "My Hero Academia",
+    "Tokyo Ghoul",
   ];
 
-  const handleSearch = (query: string) => {
-    if (query.trim()) {
-      // Handle search logic here
-      console.log("Searching for:", query);
+  // Optimized search handler
+  const handleSearch = useCallback(
+    (query: string) => {
+      if (query.trim()) {
+        router.push(`/search?q=${encodeURIComponent(query)}`);
+        setIsOpen(false);
+        setSearchQuery("");
+      }
+    },
+    [router]
+  );
+
+  // Optimized movie selection handler
+  const handleMovieSelect = useCallback(
+    (movieSlug: string) => {
+      router.push(`/phim/${movieSlug}`);
       setIsOpen(false);
-    }
-  };
+      setSearchQuery("");
+    },
+    [router]
+  );
 
   return (
     <>
       {/* Floating Action Buttons */}
       <div className="fixed top-6 right-6 z-50 flex flex-col gap-3">
         {/* Search Button */}
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, type: "spring" }}
+        <Button
+          onClick={() => setIsOpen(true)}
+          size="icon"
+          className="h-12 w-12 rounded-full shadow-lg bg-primary hover:bg-primary/90 backdrop-blur-sm transition-all duration-200 hover:scale-105"
         >
-          <Button
-            onClick={() => setIsOpen(true)}
-            size="icon"
-            className="h-12 w-12 rounded-full shadow-lg bg-primary hover:bg-primary/90 backdrop-blur-sm"
-          >
-            <Search className="h-5 w-5" />
-          </Button>
-        </motion.div>
+          <Search className="h-5 w-5" />
+        </Button>
 
         {/* Theme Toggle */}
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.3, type: "spring" }}
-        >
-          <div className="bg-background/80 backdrop-blur-sm rounded-full p-1 shadow-lg border">
-            <ModeToggle />
-          </div>
-        </motion.div>
+        <div className="bg-background/80 backdrop-blur-sm rounded-full p-1 shadow-lg border transition-all duration-200 hover:scale-105">
+          <ModeToggle />
+        </div>
       </div>
 
       {/* Floating Banner */}
-      <motion.div
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.5, type: "spring" }}
-        className="fixed top-6 left-1/2 transform -translate-x-1/2 z-40 md:left-64 md:transform-none"
-      >
-        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm border border-border/50 rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
+      <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-40 md:left-64 md:transform-none animate-in slide-in-from-top-4 duration-500">
+        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm border border-border/50 rounded-full px-4 py-2 flex items-center gap-2 shadow-lg transition-all duration-200 hover:scale-105">
           <Sparkles className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium hidden sm:inline">
             Khám phá hàng ngàn bộ phim chất lượng cao
@@ -75,92 +107,101 @@ const FloatingSearch: React.FC = () => {
             Xem phim miễn phí
           </span>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Search Overlay */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsOpen(false)}
-          >
-            <motion.div
-              className="w-full max-w-2xl mx-4"
-              initial={{ y: -50, opacity: 0, scale: 0.95 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -50, opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Card className="shadow-2xl bg-background/95 backdrop-blur-lg border-border/50">
-                <CardContent className="p-6">
-                  {/* Search Header */}
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold flex items-center gap-2">
-                      <Search className="w-5 h-5 text-primary" />
-                      Tìm kiếm phim
-                    </h2>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setIsOpen(false)}
-                      className="hover:bg-destructive hover:text-destructive-foreground"
+      {/* Search Dialog */}
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-2xl p-0 gap-0">
+          <DialogHeader className="p-6 pb-2">
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-primary" />
+              Tìm kiếm phim
+            </DialogTitle>
+            <DialogDescription>
+              Nhập tên phim bạn muốn tìm kiếm hoặc chọn từ các tìm kiếm phổ biến
+            </DialogDescription>
+          </DialogHeader>
+
+          <Command className="rounded-none border-none">
+            <CommandInput
+              placeholder="Nhập tên phim bạn muốn tìm..."
+              className="h-12 text-base"
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+            />
+            <CommandList className="max-h-[400px]">
+              <CommandEmpty>
+                <div className="text-center py-6">
+                  <Search className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    {isLoading ? "Đang tìm kiếm..." : "Không tìm thấy kết quả"}
+                  </p>
+                </div>
+              </CommandEmpty>
+
+              {/* Search Results */}
+              {searchResults.length > 0 && (
+                <CommandGroup heading="Kết quả tìm kiếm">
+                  {searchResults.slice(0, 5).map((movie: any) => (
+                    <CommandItem
+                      key={movie.slug}
+                      onSelect={() => handleMovieSelect(movie.slug)}
+                      className="cursor-pointer py-3"
                     >
-                      <X className="w-5 h-5" />
-                    </Button>
-                  </div>
+                      <div className="relative w-8 h-8 mr-3 flex-shrink-0">
+                        <Image
+                          src={
+                            movie.thumb_url ||
+                            movie.poster_url ||
+                            "/placeholder-movie.jpg"
+                          }
+                          alt={movie.name}
+                          fill
+                          className="rounded object-cover"
+                          sizes="32px"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/placeholder-movie.jpg";
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium">{movie.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {movie.year} • {movie.episode_current}
+                        </div>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
 
-                  {/* Search Input */}
-                  <div className="relative mb-6">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      placeholder="Nhập tên phim bạn muốn tìm..."
-                      className="pl-10 text-lg h-12 bg-background/50 border-border/50 focus:border-primary"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          handleSearch(searchQuery);
-                        }
-                      }}
-                      autoFocus
-                    />
+              <CommandGroup
+                heading={
+                  <div className="flex items-center gap-2 py-2">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Tìm kiếm phổ biến</span>
                   </div>
-
-                  {/* Trending Searches */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <TrendingUp className="w-4 h-4" />
-                      <span>Tìm kiếm phổ biến</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {trendingSearches.map((term, index) => (
-                        <motion.div
-                          key={term}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.1 }}
-                        >
-                          <Badge
-                            variant="secondary"
-                            className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-all duration-200 hover:scale-105"
-                            onClick={() => handleSearch(term)}
-                          >
-                            {term}
-                          </Badge>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                }
+              >
+                {trendingSearches.map((term) => (
+                  <CommandItem
+                    key={term}
+                    onSelect={() => handleSearch(term)}
+                    className="cursor-pointer py-3"
+                  >
+                    <Search className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <span>{term}</span>
+                    <Badge variant="secondary" className="ml-auto">
+                      Phổ biến
+                    </Badge>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

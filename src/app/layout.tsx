@@ -1,34 +1,23 @@
-import type { Metadata } from "next";
+"use client";
+
 import "./globals.css";
 import Layouts from "@/layouts";
-import { getCategories, getCountries } from "@/actions";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { queryClient } from "@/lib/react-query";
 
-export const metadata: Metadata = {
-  title: "MoViGo - Movies & TV Shows",
-  description: "Discover and watch your favorite movies and TV shows online",
-};
-
-export const dynamic = "force-dynamic"; // Force dynamic rendering for this layout
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [categories, countries] = await Promise.all([
-    getCategories(),
-    getCountries(),
-  ]);
-
   return (
     <html lang="en">
       <body className={`antialiased`}>
-        <Layouts
-          categories={categories?.data?.items || []}
-          countries={countries?.data?.items || []}
-        >
-          {children}
-        </Layouts>
+        <QueryClientProvider client={queryClient}>
+          <Layouts>{children}</Layouts>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
       </body>
     </html>
   );

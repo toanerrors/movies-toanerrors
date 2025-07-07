@@ -1,19 +1,33 @@
 "use client";
 import React from "react";
-import { Category, Country } from "@/types/common";
 import { MenuProvider } from "@/contexts/MenuContext";
 import SidebarNav from "./SidebarNav";
 import BottomNav from "./BottomNav";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import FloatingSearch from "./FloatingSearch";
+import { useCategories, useCountries } from "@/hooks/useData";
 
 type LayoutsProps = {
   children: React.ReactNode;
-  categories: Category[];
-  countries: Country[];
 };
 
-function Layouts({ children, categories, countries }: LayoutsProps) {
+function Layouts({ children }: LayoutsProps) {
+  const { data: categories = [], isLoading: categoriesLoading } =
+    useCategories();
+  const { data: countries = [], isLoading: countriesLoading } = useCountries();
+
+  // Show loading state while data is being fetched
+  if (categoriesLoading || countriesLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Đang tải...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <MenuProvider categories={categories} countries={countries}>
       <SidebarProvider>

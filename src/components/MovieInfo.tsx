@@ -23,7 +23,6 @@ import {
   Share2,
   Bookmark,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import {
   HoverCard,
   HoverCardContent,
@@ -83,23 +82,13 @@ export default function MovieInfo({ movie }: MovieInfoProps) {
         }}
       />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10"
-      >
+      <div className="relative z-10 animate-in fade-in slide-in-from-bottom duration-700">
         <Card className="border-none bg-gradient-to-br from-background/95 via-background/90 to-background/95 backdrop-blur-xl shadow-2xl">
           <CardContent className="p-6 lg:p-8">
             {/* Main content */}
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
               {/* Poster section */}
-              <motion.div
-                className="flex-shrink-0 mx-auto lg:mx-0"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
+              <div className="flex-shrink-0 mx-auto lg:mx-0 animate-in fade-in zoom-in duration-500 delay-200">
                 <div className="relative group w-64 lg:w-80">
                   <div className="relative overflow-hidden rounded-2xl shadow-2xl group-hover:shadow-3xl transition-all duration-500">
                     <Image
@@ -186,15 +175,10 @@ export default function MovieInfo({ movie }: MovieInfoProps) {
                     </Button>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Movie details */}
-              <motion.div
-                className="flex-1 space-y-6"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
+              <div className="flex-1 space-y-6 animate-in fade-in slide-in-from-right duration-500 delay-300">
                 {/* Title section */}
                 <div className="space-y-3">
                   <h1 className="text-3xl lg:text-4xl font-bold leading-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
@@ -303,16 +287,11 @@ export default function MovieInfo({ movie }: MovieInfoProps) {
                     )}
                   </div>
                 )}
-              </motion.div>
+              </div>
             </div>
 
             {/* Synopsis */}
-            <motion.div
-              className="mt-8 space-y-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
+            <div className="mt-8 space-y-4 animate-in fade-in slide-in-from-bottom duration-500 delay-400">
               <h3 className="text-xl font-bold">Nội dung phim</h3>
               <div className="prose prose-slate dark:prose-invert max-w-none">
                 <div
@@ -320,10 +299,10 @@ export default function MovieInfo({ movie }: MovieInfoProps) {
                   dangerouslySetInnerHTML={{ __html: movie.content }}
                 />
               </div>
-            </motion.div>
+            </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 }

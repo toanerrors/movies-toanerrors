@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Play, Clock, TrendingUp, BarChart3, Film } from "lucide-react";
-import { motion } from "framer-motion";
 
 interface WatchHistoryManagerProps {
   className?: string;
@@ -229,12 +228,10 @@ export default function WatchHistoryManager({
             ) : (
               <div className="space-y-2">
                 {recentEpisodes.map((item, index) => (
-                  <motion.div
+                  <div
                     key={`${item.movieSlug}-${item.episodeSlug}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted/80 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted/80 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <div className="flex-1">
                       <div className="font-medium text-sm">
@@ -276,7 +273,7 @@ export default function WatchHistoryManager({
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             )}
@@ -287,11 +284,10 @@ export default function WatchHistoryManager({
       {selectedTab === "movies" && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Object.values(movieStats).map((stats, index) => (
-            <motion.div
+            <div
               key={stats.movieSlug}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
+              className="animate-in fade-in zoom-in-95 duration-300"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
               <Card>
                 <CardContent className="p-4">
@@ -330,7 +326,7 @@ export default function WatchHistoryManager({
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           ))}
         </div>
       )}
