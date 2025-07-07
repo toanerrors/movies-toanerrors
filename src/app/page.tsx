@@ -17,9 +17,16 @@ function HomeContent() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen">
-        <div className="container mx-auto px-4 py-8">
-          {/* Movies Grid Skeleton */}
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="w-full max-w-7xl mx-auto px-4 py-8">
+          <div className="mb-10 text-center animate-in fade-in slide-in-from-bottom duration-700">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Tất cả phim mới cập nhật
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Khám phá toàn bộ thư viện phim của chúng tôi
+            </p>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {Array.from({ length: 24 }).map((_, i) => (
               <Card key={i}>
@@ -57,42 +64,37 @@ function HomeContent() {
     homeData.params?.pagination?.totalItemsPerPage || 24;
 
   return (
-    <main className="min-h-screen">
-      <section className="py-16 bg-muted/10">
-        <div className="container mx-auto px-4">
-          <div className="mb-12 text-center animate-in fade-in slide-in-from-bottom duration-700">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Tất cả phim mới cập nhật
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Khám phá toàn bộ thư viện phim của chúng tôi
-            </p>
-          </div>
-
-          {/* All Movies Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {movies.map((movie, index) => (
-              <div
-                key={movie._id}
-                className="animate-in fade-in zoom-in duration-500"
-                style={{ animationDelay: `${index * 0.02}s` }}
-              >
-                <MovieCard movie={movie} cdnUrl={CDN} />
-              </div>
-            ))}
-          </div>
-          {/* Pagination */}
-          <div className="mt-16 flex justify-center animate-in fade-in slide-in-from-bottom duration-700 delay-300">
-            <Card className="bg-background/60 backdrop-blur-sm border-border/50">
-              <CardContent className="p-6">
-                <Pagination
-                  currentPage={currentPage}
-                  totalItems={totalItems || 0}
-                  itemsPerPage={totalItemsPerPage || 0}
-                />
-              </CardContent>
-            </Card>
-          </div>
+    <main className="min-h-screen flex items-center justify-center bg-muted/10 py-12">
+      <section className="w-full max-w-7xl mx-auto px-4">
+        <div className="mb-10 text-center animate-in fade-in slide-in-from-bottom duration-700">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Tất cả phim mới cập nhật
+          </h2>
+          <p className="text-muted-foreground text-lg">
+            Khám phá toàn bộ thư viện phim của chúng tôi
+          </p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          {movies.map((movie, index) => (
+            <div
+              key={movie._id}
+              className="animate-in fade-in zoom-in duration-500"
+              style={{ animationDelay: `${index * 0.02}s` }}
+            >
+              <MovieCard movie={movie} cdnUrl={CDN} />
+            </div>
+          ))}
+        </div>
+        <div className="mt-12 flex justify-center animate-in fade-in slide-in-from-bottom duration-700 delay-300">
+          <Card className="bg-background/60 backdrop-blur-sm border-border/50">
+            <CardContent className="p-6">
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={totalItemsPerPage}
+              />
+            </CardContent>
+          </Card>
         </div>
       </section>
     </main>

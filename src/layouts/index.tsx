@@ -36,7 +36,7 @@ function Layouts({ children }: LayoutsProps) {
 
         {/* Main Content Area */}
         <SidebarInset>
-          <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-muted/10">
+          <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-background via-background to-muted/10">
             {/* Floating Search */}
             <FloatingSearch />
 
