@@ -75,6 +75,7 @@ export default function EnhancedVideoDialog({
                 onPrev={onPrev}
                 onNext={onNext}
                 onClose={onClose}
+                episodeName={episode.name}
               />
             ) : (
               <VideoPlayer

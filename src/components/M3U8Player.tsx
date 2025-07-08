@@ -472,7 +472,7 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
                   {formatTime(duration)}
                 </span>
               </div>
-              {/* Main Controls Row - mobile: chỉ giữ play/pause và fullscreen, căn giữa, spacing đều */}
+              {/* Main Controls Row - thêm nút mute/unmute luôn hiển thị */}
               <div className="w-full flex items-center justify-center mt-1 sm:mt-1.5">
                 <div
                   className="flex items-center justify-center gap-2 sm:gap-2.5 bg-white/10 backdrop-blur-lg rounded-2xl shadow border border-white/20 px-2 py-1 sm:px-3 sm:py-1.5 pointer-events-auto mx-auto"
@@ -495,6 +495,22 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
                       <PlayCircle className="h-6 w-6 sm:h-7 sm:w-7" />
                     )}
                   </Button>
+                  {/* Mute/Unmute Button - luôn hiển thị */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 sm:h-10 sm:w-10 text-white hover:bg-white/20 rounded-full focus:ring-2 focus:ring-white/40"
+                    onClick={toggleMute}
+                    aria-label={
+                      isMuted || volume === 0 ? "Bật âm thanh" : "Tắt âm thanh"
+                    }
+                  >
+                    {isMuted || volume === 0 ? (
+                      <VolumeX className="h-6 w-6 sm:h-7 sm:w-7" />
+                    ) : (
+                      <Volume2 className="h-6 w-6 sm:h-7 sm:w-7" />
+                    )}
+                  </Button>
                   {/* Fullscreen Button */}
                   <Button
                     variant="ghost"
@@ -510,7 +526,21 @@ const M3U8Player: React.FC<M3U8PlayerProps> = ({
                   </Button>
                 </div>
               </div>
-              {/* Mobile Volume Slider: đã ẩn hoàn toàn trên mobile */}
+              {/* Episode Name Overlay - glassmorphism, chỉ hiển thị episodeName, đồng bộ UI */}
+              {episodeName && (
+                <div
+                  className="fixed left-2 bottom-3 sm:bottom-4 bg-white/10 backdrop-blur-lg rounded-2xl px-4 py-1 shadow-lg pointer-events-none select-none max-w-[90vw] z-50 border border-white/20"
+                  style={{
+                    boxShadow:
+                      "0 2px 12px 0 rgba(0,0,0,0.14), 0 1px 4px 0 rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.14)",
+                  }}
+                >
+                  <span className="text-white text-sm font-semibold truncate max-w-full drop-shadow">
+                    {episodeName}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}
